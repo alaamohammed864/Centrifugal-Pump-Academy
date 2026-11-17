@@ -158,7 +158,7 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       {/* Top 3-Zone Navigation Bar (Single-Row Desktop, Responsive Scrollable on Mobile) */}
       <header className="no-print sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95">
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-2 px-3 py-2 sm:px-4">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-2 px-3 py-2 sm:px-4">
           {/* Zone 1: Brand Title */}
           <button
             type="button"
@@ -220,34 +220,10 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
         </div>
 
         {/* Mobile / Tablet Compact Horizontal Strip */}
-        <nav
-          aria-label="التنقل على الهاتف"
-          className="flex items-center gap-1.5 overflow-x-auto border-t border-slate-200 px-3 py-2 lg:hidden dark:border-slate-800"
-        >
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleNavigate(item.id)}
-                className={`inline-flex min-h-[34px] shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-semibold ${
-                  active
-                    ? 'bg-sky-600 text-white'
-                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
       </header>
 
       {/* Main Content Container */}
-      <main className="mx-auto max-w-7xl px-3 py-4 sm:px-5 sm:py-5">
+      <main className="app-main mx-auto max-w-7xl px-3 py-4 sm:px-5 sm:py-5">
         {activeTab === 'home' && (
           <DashboardHome progress={progress} onNavigate={handleNavigate} isStandaloneHtml={isStandaloneHtml} />
         )}
@@ -300,6 +276,16 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
           <span>مبنية على دراسة وتقييم الأداء لمضخات الطرد المركزي – شركة نفط البصرة</span>
         </div>
       </footer>
+      <nav className="app-bottom-nav no-print" aria-label="التنقل الرئيسي على الهاتف">
+        {NAV_ITEMS.slice(0, 5).map((item) => {
+          const Icon = item.icon;
+          const active = activeTab === item.id;
+          return <button key={item.id} type="button" onClick={() => handleNavigate(item.id)} aria-current={active ? 'page' : undefined} className={active ? 'app-nav-item active' : 'app-nav-item'}>
+            <Icon aria-hidden="true" /><span>{item.id === 'lessons' ? 'الدروس' : item.id === 'lab3d' ? '3D' : item.id === 'simulator' ? 'المحاكي' : item.id === 'curves' ? 'المنحنيات' : 'الرئيسية'}</span>
+          </button>;
+        })}
+        <button type="button" className="app-nav-item" onClick={() => handleNavigate('tools')}><Compass aria-hidden="true" /><span>المزيد</span></button>
+      </nav>
     </div>
   );
 }
