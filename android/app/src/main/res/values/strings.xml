@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">أكاديمية مضخات الطرد المركزي</string>
+    <string name="title_activity_main">أكاديمية مضخات الطرد المركزي</string>
+    <string name="package_name">com.centrifugalpump.academy</string>
+    <string name="custom_url_scheme">com.centrifugalpump.academy</string>
+</resources>

@@ -1,0 +1,10 @@
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.centrifugalpump.academy',
+  appName: 'أكاديمية مضخات الطرد المركزي',
+  webDir: 'dist',
+  server: { androidScheme: 'https' },
+};
+
+export default config;
