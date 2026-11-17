@@ -79,7 +79,7 @@ export const ToolsView: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Sub Tabs */}
-      <div className="flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex flex-nowrap gap-1.5 overflow-x-auto rounded-xl border border-slate-200 bg-white p-3 sm:flex-wrap sm:overflow-visible dark:border-slate-800 dark:bg-slate-900">
         {(
           [
             ['calc', 'الحاسبة الهندسية والتحويلات', Calculator],
@@ -93,7 +93,7 @@ export const ToolsView: React.FC = () => {
             key={id}
             type="button"
             onClick={() => setTab(id)}
-            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${
+            className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${
               tab === id
                 ? 'bg-sky-600 text-white'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'

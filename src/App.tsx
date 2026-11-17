@@ -163,14 +163,21 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
           <button
             type="button"
             onClick={() => handleNavigate('home')}
-            className="flex shrink-0 items-center gap-2 text-right"
+            className="flex min-w-0 items-center gap-2 text-right"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-600 text-white">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white">
               <Box className="h-4 w-4" />
             </span>
-            <div className="leading-tight">
-              <div className="text-sm font-bold text-slate-900 dark:text-white">أكاديمية الطرد المركزي</div>
-              <div className="font-en text-[10px] text-slate-500 dark:text-slate-400">Centrifugal Pump Academy</div>
+            <div className="min-w-0 leading-tight">
+              <div className="flex flex-wrap items-baseline gap-x-1.5">
+                <span className="text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
+                  أكاديمية مضخات الطرد المركزي
+                </span>
+                <span className="hidden text-slate-400 sm:inline">|</span>
+                <span className="font-en text-[10px] font-semibold text-sky-600 dark:text-sky-400 sm:text-xs">
+                  Centrifugal Pump Academy
+                </span>
+              </div>
             </div>
           </button>
 
@@ -216,7 +223,7 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
         {/* Mobile / Tablet Compact Horizontal Strip */}
         <nav
           aria-label="التنقل على الهاتف"
-          className="flex items-center gap-1 overflow-x-auto border-t border-slate-200 px-3 py-1.5 lg:hidden dark:border-slate-800"
+          className="flex items-center gap-1.5 overflow-x-auto border-t border-slate-200 px-3 py-2 lg:hidden dark:border-slate-800"
         >
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -226,7 +233,7 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
                 key={item.id}
                 type="button"
                 onClick={() => handleNavigate(item.id)}
-                className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-semibold ${
+                className={`inline-flex min-h-[34px] shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-semibold ${
                   active
                     ? 'bg-sky-600 text-white'
                     : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
@@ -283,8 +290,16 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
       </main>
 
       {/* Footer */}
-      <footer className="no-print mt-6 border-t border-slate-200 bg-white py-3 text-center text-[11px] text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-        أكاديمية مضخات الطرد المركزي الهندسية · مبنية على دراسة وتقييم الأداء لمضخات الطرد المركزي – شركة نفط البصرة · للاستخدام التعليمي والتدريبي الهندسي
+      <footer className="no-print mt-6 border-t border-slate-200 bg-white px-3 py-3.5 text-center text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-2 gap-y-1">
+          <span>
+            تطوير وإعداد: <strong dir="ltr" className="font-en font-bold text-sky-600 dark:text-sky-400">ENG ALAA MOHAMMED</strong>
+          </span>
+          <span aria-hidden="true">·</span>
+          <span>أكاديمية مضخات الطرد المركزي | Centrifugal Pump Academy</span>
+          <span aria-hidden="true">·</span>
+          <span>مبنية على دراسة وتقييم الأداء لمضخات الطرد المركزي – شركة نفط البصرة</span>
+        </div>
       </footer>
     </div>
   );

@@ -62,7 +62,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({ progress, onTo
             <CalendarCheck className="h-4 w-4 text-emerald-500" />
             <span>منظومة الصيانة الوقائية التدريبية ({completedCount}/{MAINTENANCE_TASKS.length} مهمة)</span>
           </div>
-          <div className="mt-2 h-2 w-64 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+          <div className="mt-2 h-2 w-full max-w-xs overflow-hidden rounded-full bg-slate-200 sm:w-64 dark:bg-slate-800">
             <div className="h-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
           </div>
         </div>
@@ -88,16 +88,16 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({ progress, onTo
       </div>
 
       {/* Period Filter Tabs */}
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
         {PERIOD_LABELS.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => setPeriod(p.id)}
-            className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${
+            className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${
               period === p.id
                 ? 'bg-sky-600 text-white'
-                : 'bg-white text-slate-700 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'
+                : 'border border-slate-200 bg-white text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'
             }`}
           >
             {p.label}

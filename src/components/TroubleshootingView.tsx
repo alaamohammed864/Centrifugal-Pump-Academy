@@ -44,29 +44,29 @@ export const TroubleshootingView: React.FC = () => {
     <div className="space-y-4">
       {/* Mode Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <button
             type="button"
             onClick={() => setSubTab('tables')}
-            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-bold ${
+            className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold sm:flex-initial ${
               subTab === 'tables'
                 ? 'bg-sky-600 text-white'
                 : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
             }`}
           >
-            <Wrench className="h-3.5 w-3.5" />
+            <Wrench className="h-3.5 w-3.5 shrink-0" />
             <span>جداول الأعطال المرجعية (ص 138–145)</span>
           </button>
           <button
             type="button"
             onClick={() => setSubTab('missions')}
-            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-bold ${
+            className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold sm:flex-initial ${
               subTab === 'missions'
                 ? 'bg-amber-600 text-white'
                 : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
             }`}
           >
-            <ClipboardCheck className="h-3.5 w-3.5" />
+            <ClipboardCheck className="h-3.5 w-3.5 shrink-0" />
             <span>مختبر «أنت مهندس الصيانة» التفاعلي</span>
           </button>
         </div>
@@ -185,13 +185,13 @@ export const TroubleshootingView: React.FC = () => {
       ) : (
         /* Interactive Diagnostic Missions ("أنت مهندس الصيانة") */
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-nowrap gap-1.5 overflow-x-auto rounded-xl border border-slate-200 bg-white p-3 pb-3.5 sm:flex-wrap sm:overflow-visible dark:border-slate-800 dark:bg-slate-900">
             {DIAGNOSTIC_MISSIONS.map((m, idx) => (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => selectMission(idx)}
-                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${
+                className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${
                   missionIdx === idx
                     ? 'bg-amber-600 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'

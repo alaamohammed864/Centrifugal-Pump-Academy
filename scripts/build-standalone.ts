@@ -48,6 +48,7 @@ async function main() {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>أكاديمية مضخات الطرد المركزي | Centrifugal Pump Academy</title>
+    <meta name="author" content="ENG ALAA MOHAMMED" />
     <meta name="description" content="منصة تعليمية هندسية تفاعلية متكاملة لمضخات الطرد المركزي – دراسة شركة نفط البصرة" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

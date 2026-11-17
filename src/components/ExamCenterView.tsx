@@ -159,7 +159,7 @@ export const ExamCenterView: React.FC<ExamCenterViewProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
           {(
             [
               ['chapter', 'اختبار فصل محدد'],
@@ -175,7 +175,7 @@ export const ExamCenterView: React.FC<ExamCenterViewProps> = ({
               key={mId}
               type="button"
               onClick={() => resetExam(mId)}
-              className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-semibold ${
+              className={`shrink-0 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-semibold ${
                 mode === mId
                   ? 'bg-sky-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
@@ -199,7 +199,7 @@ export const ExamCenterView: React.FC<ExamCenterViewProps> = ({
                 setAnswers({});
                 setSubmitted(false);
               }}
-              className="max-w-md rounded-md border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="w-full max-w-full rounded-md border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs sm:w-auto sm:max-w-md dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             >
               {LESSONS.map((l) => (
                 <option key={l.id} value={l.id}>
