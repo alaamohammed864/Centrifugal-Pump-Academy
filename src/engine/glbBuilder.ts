@@ -387,6 +387,8 @@ const MATERIALS: GlbMaterialDef[] = [
   /* 9 */ { name: 'AlertRedIndicator', baseColorFactor: [0.88, 0.20, 0.18, 1.0], metallicFactor: 0.25, roughnessFactor: 0.35, emissiveFactor: [0.35, 0.05, 0.04] },
   /* 10 */ { name: 'LaserGreenBeam', baseColorFactor: [0.12, 0.90, 0.42, 0.88], metallicFactor: 0.1, roughnessFactor: 0.2, alphaMode: 'BLEND', emissiveFactor: [0.08, 0.7, 0.25] },
   /* 11 */ { name: 'FluidPipeGlass', baseColorFactor: [0.55, 0.80, 0.96, 0.36], metallicFactor: 0.15, roughnessFactor: 0.15, alphaMode: 'BLEND' },
+  /* 12 */ { name: 'HighPressureEmeraldIron', baseColorFactor: [0.08, 0.44, 0.32, 1.0], metallicFactor: 0.48, roughnessFactor: 0.44 },
+  /* 13 */ { name: 'CrankcaseSlateIron', baseColorFactor: [0.24, 0.30, 0.38, 1.0], metallicFactor: 0.50, roughnessFactor: 0.50 },
 ];
 
 // ---------- GLB Binary Encoder (glTF 2.0 Spec) ----------
@@ -1057,6 +1059,820 @@ function buildAlignmentParts(): GlbPartDef[] {
   return parts;
 }
 
+// ---------- 9 Remaining PDF Pump Type GLB Models ----------
+
+function makeSpurGearGeo(pitchR: number, thickness: number, teeth = 10, boreR = 0.06, phaseOffset = 0): GeometryData {
+  const parts: GeometryData[] = [
+    transformGeo(makeCylinder(pitchR * 0.86, pitchR * 0.86, thickness, 16, boreR), 0, 0, 0, 0, 0, Math.PI / 2),
+  ];
+  const toothH = pitchR * 0.28;
+  const toothW = (Math.PI * 2 * pitchR) / (teeth * 2.3);
+  for (let i = 0; i < teeth; i++) {
+    const a = (i / teeth) * Math.PI * 2 + phaseOffset;
+    const r = pitchR * 0.94;
+    parts.push(transformGeo(makeBox(thickness * 0.94, toothH, toothW), 0, r * Math.cos(a), r * Math.sin(a), -a, 0, 0));
+  }
+  return mergeGeos(parts);
+}
+
+function makeHelicalScrewGeo(radius: number, length: number, turns = 3.2, handedness = 1): GeometryData {
+  const parts: GeometryData[] = [
+    transformGeo(makeCylinder(radius * 0.42, radius * 0.42, length, 14), 0, 0, 0, 0, 0, Math.PI / 2),
+  ];
+  const segs = 28;
+  for (let i = 0; i < segs; i++) {
+    const t = i / segs - 0.5;
+    const x = t * length * 0.88;
+    const a = t * turns * Math.PI * 2 * handedness;
+    const y = radius * 0.68 * Math.cos(a);
+    const z = radius * 0.68 * Math.sin(a);
+    parts.push(
+      transformGeo(makeBox(length / segs * 1.15, radius * 0.62, 0.045), x, y, z, -a, 0, 0.35 * handedness),
+    );
+  }
+  return mergeGeos(parts);
+}
+
+function makeLobeRotorGeo(radius: number, length: number, lobes = 3, phaseOffset = 0): GeometryData {
+  const parts: GeometryData[] = [
+    transformGeo(makeCylinder(radius * 0.46, radius * 0.46, length, 14, 0.05), 0, 0, 0, 0, 0, Math.PI / 2),
+  ];
+  for (let i = 0; i < lobes; i++) {
+    const a = (i / lobes) * Math.PI * 2 + phaseOffset;
+    const cy = radius * 0.52 * Math.cos(a);
+    const cz = radius * 0.52 * Math.sin(a);
+    parts.push(transformGeo(makeCylinder(radius * 0.44, radius * 0.44, length * 0.96, 12), 0, cy, cz, 0, 0, Math.PI / 2));
+  }
+  return mergeGeos(parts);
+}
+
+function buildMultistagePumpParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  parts.push({
+    name: 'Baseplate',
+    mesh: makeBox(4.3, 0.14, 1.35),
+    materialIndex: 3,
+    translation: [0.05, 0.07, 0],
+    extras: { partId: 'baseplate', explodeDir: [0, -0.5, 0] },
+  });
+
+  // 5-stage tie-bolted segmented casing (transparent middle window + solid end heads & tie rods)
+  const stageParts: GeometryData[] = [
+    transformGeo(makeCylinder(0.54, 0.54, 0.16, 18, 0.16), -0.82, 0, 0, 0, 0, Math.PI / 2), // Suction cover
+    transformGeo(makeCylinder(0.54, 0.54, 0.16, 18, 0.16), 0.82, 0, 0, 0, 0, Math.PI / 2), // Discharge cover
+    transformGeo(makeCylinder(0.24, 0.24, 0.48, 14, 0.17), -0.72, 0.68, 0), // Top vertical suction nozzle
+    transformGeo(makeCylinder(0.34, 0.34, 0.06, 14, 0.17), -0.72, 0.92, 0),
+    transformGeo(makeCylinder(0.22, 0.22, 0.56, 14, 0.15), 0.72, 0.72, 0), // Top high-pressure discharge nozzle
+    transformGeo(makeCylinder(0.34, 0.34, 0.06, 14, 0.15), 0.72, 1.0, 0),
+    transformGeo(makeBox(0.32, 0.35, 0.92), -0.75, -0.62, 0),
+    transformGeo(makeBox(0.32, 0.35, 0.92), 0.75, -0.62, 0),
+  ];
+  // 4 Tie rods clamping stages together
+  for (const [ty, tz] of [[0.48, 0.48], [0.48, -0.48], [-0.48, 0.48], [-0.48, -0.48]]) {
+    stageParts.push(transformGeo(makeCylinder(0.032, 0.032, 1.76, 8), 0, ty, tz, 0, 0, Math.PI / 2));
+  }
+  parts.push({
+    name: 'MultistageEndHeads',
+    mesh: mergeGeos(stageParts),
+    materialIndex: 0,
+    translation: [-0.82, 0.92, 0],
+    extras: { partId: 'multistage_casing', explodeDir: [-0.45, 0.25, -0.45] },
+  });
+
+  // Cutaway glass stage rings so 5 impellers are visible
+  const ringGeos: GeometryData[] = [];
+  for (let i = 0; i < 5; i++) {
+    ringGeos.push(transformGeo(makeCylinder(0.50, 0.50, 0.24, 18, 0.44), -0.56 + i * 0.28, 0, 0, 0, 0, Math.PI / 2));
+  }
+  parts.push({
+    name: 'StageDiffuserShell',
+    mesh: mergeGeos(ringGeos),
+    materialIndex: 11,
+    translation: [-0.82, 0.92, 0],
+    extras: { partId: 'multistage_casing', explodeDir: [0, 0.85, 0] },
+  });
+
+  // 5 Brass Closed Impellers in series on single shaft
+  const impGeos: GeometryData[] = [];
+  for (let i = 0; i < 5; i++) {
+    impGeos.push(transformGeo(makeImpellerGeometry('closed', 0.38, 5), -0.56 + i * 0.28, 0, 0));
+  }
+  parts.push({
+    name: 'MultistageImpellerStack',
+    mesh: mergeGeos(impGeos),
+    materialIndex: 2,
+    translation: [-0.82, 0.92, 0],
+    extras: { partId: 'multistage_impellers', explodeDir: [0, 0.4, 0.7] },
+  });
+
+  parts.push({
+    name: 'PumpShaft',
+    mesh: transformGeo(makeCylinder(0.06, 0.06, 2.55, 14), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 1,
+    translation: [-0.35, 0.92, 0],
+    extras: { partId: 'shaft', explodeDir: [0, 0.3, 0] },
+  });
+
+  parts.push({
+    name: 'BearingHousing',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.20, 0.20, 0.34, 14, 0.09), -1.78, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeBox(0.26, 0.56, 0.34), -1.78, -0.45, 0),
+      transformGeo(makeCylinder(0.20, 0.20, 0.34, 14, 0.09), 0.16, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeBox(0.26, 0.56, 0.34), 0.16, -0.45, 0),
+    ]),
+    materialIndex: 0,
+    translation: [-0.0, 0.92, 0],
+    extras: { partId: 'bearing_housing', explodeDir: [0, -0.25, -0.5] },
+  });
+
+  parts.push({
+    name: 'Coupling',
+    mesh: transformGeo(makeCylinder(0.15, 0.15, 0.20, 14, 0.06), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 4,
+    translation: [0.58, 0.92, 0],
+    extras: { partId: 'coupling', explodeDir: [0, 0.75, 0] },
+  });
+
+  parts.push({
+    name: 'ElectricMotor',
+    mesh: makeElectricMotor(),
+    materialIndex: 7,
+    translation: [1.42, 0.92, 0],
+    extras: { partId: 'electric_motor', explodeDir: [0.75, 0, 0] },
+  });
+
+  return parts;
+}
+
+function buildSplitCaseDoubleSuctionParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  parts.push({
+    name: 'Baseplate',
+    mesh: makeBox(3.9, 0.14, 1.55),
+    materialIndex: 3,
+    translation: [0.1, 0.07, 0],
+    extras: { partId: 'baseplate', explodeDir: [0, -0.4, 0] },
+  });
+
+  // Lower split casing with BOTH suction & discharge side nozzles mounted on bottom half!
+  const lowerHalf = mergeGeos([
+    makeBox(0.86, 0.52, 1.15),
+    transformGeo(makeCylinder(0.52, 0.52, 0.76, 18), 0, 0.26, 0, 0, 0, Math.PI / 2),
+    // Side suction pipe (+Z)
+    transformGeo(makeCylinder(0.25, 0.25, 0.65, 16, 0.20), 0, 0.12, 0.82, Math.PI / 2, 0, 0),
+    transformGeo(makeCylinder(0.36, 0.36, 0.06, 16, 0.20), 0, 0.12, 1.15, Math.PI / 2, 0, 0),
+    // Side discharge pipe (-Z)
+    transformGeo(makeCylinder(0.21, 0.21, 0.65, 16, 0.16), 0, 0.12, -0.82, Math.PI / 2, 0, 0),
+    transformGeo(makeCylinder(0.32, 0.32, 0.06, 16, 0.16), 0, 0.12, -1.15, Math.PI / 2, 0, 0),
+  ]);
+  parts.push({
+    name: 'LowerSplitCasing',
+    mesh: lowerHalf,
+    materialIndex: 0,
+    translation: [-0.95, 0.56, 0],
+    extras: { partId: 'lower_split_casing', explodeDir: [0, -0.2, 0] },
+  });
+
+  // Removable Upper Split Casing cover (semi-transparent/cutaway feel so central rotor shows at explode=0, lifts up cleanly on explode!)
+  const upperHalf = mergeGeos([
+    transformGeo(makeCylinder(0.52, 0.52, 0.74, 18, 0.44), 0, 0, 0, 0, 0, Math.PI / 2),
+    makeBox(0.92, 0.08, 1.18), // horizontal split flange lip
+    transformGeo(makeTorus(0.08, 0.022, 12, 8), 0, 0.58, 0), // top lifting eye
+  ]);
+  parts.push({
+    name: 'UpperSplitCasing',
+    mesh: upperHalf,
+    materialIndex: 11,
+    translation: [-0.95, 0.86, 0],
+    extras: { partId: 'upper_split_casing', explodeDir: [0, 1.05, 0] },
+  });
+
+  // Central Double-Suction Back-to-Back Impeller
+  const dsImpeller = mergeGeos([
+    transformGeo(makeImpellerGeometry('closed', 0.42, 6), -0.11, 0, 0),
+    transformGeo(makeImpellerGeometry('closed', 0.42, 6), 0.11, 0, 0, Math.PI, Math.PI, 0),
+  ]);
+  parts.push({
+    name: 'DoubleSuctionImpeller',
+    mesh: dsImpeller,
+    materialIndex: 2,
+    translation: [-0.95, 0.86, 0],
+    extras: { partId: 'double_suction_impeller', explodeDir: [0, 0.45, 0.65] },
+  });
+
+  parts.push({
+    name: 'PumpShaft',
+    mesh: transformGeo(makeCylinder(0.065, 0.065, 2.25, 14), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 1,
+    translation: [-0.45, 0.86, 0],
+    extras: { partId: 'shaft', explodeDir: [0, 0.35, 0] },
+  });
+
+  // Between-Bearings Pedestals (BB1 configuration)
+  parts.push({
+    name: 'BearingHousing',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.19, 0.19, 0.30, 14, 0.09), -1.62, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeBox(0.24, 0.52, 0.34), -1.62, -0.44, 0),
+      transformGeo(makeCylinder(0.19, 0.19, 0.30, 14, 0.09), -0.26, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeBox(0.24, 0.52, 0.34), -0.26, -0.44, 0),
+    ]),
+    materialIndex: 0,
+    translation: [0, 0.86, 0],
+    extras: { partId: 'bearing_housing', explodeDir: [0, -0.2, -0.5] },
+  });
+
+  parts.push({
+    name: 'Coupling',
+    mesh: transformGeo(makeCylinder(0.15, 0.15, 0.20, 14, 0.06), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 4,
+    translation: [0.46, 0.86, 0],
+    extras: { partId: 'coupling', explodeDir: [0, 0.7, 0] },
+  });
+
+  parts.push({
+    name: 'ElectricMotor',
+    mesh: makeElectricMotor(),
+    materialIndex: 7,
+    translation: [1.32, 0.86, 0],
+    extras: { partId: 'electric_motor', explodeDir: [0.75, 0, 0] },
+  });
+
+  return parts;
+}
+
+function buildBarrelPumpParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  parts.push({
+    name: 'Baseplate',
+    mesh: makeBox(4.2, 0.15, 1.45),
+    materialIndex: 3,
+    translation: [0.05, 0.075, 0],
+    extras: { partId: 'baseplate', explodeDir: [0, -0.45, 0] },
+  });
+
+  // Thick Forged Cylindrical Barrel Outer Shell (semi-transparent body + heavy top suction/discharge high-pressure nozzles)
+  const barrelShell = mergeGeos([
+    transformGeo(makeCylinder(0.62, 0.62, 1.65, 20, 0.50), 0, 0, 0, 0, 0, Math.PI / 2),
+    // Vertical Top Suction Nozzle
+    transformGeo(makeCylinder(0.22, 0.22, 0.55, 14, 0.15), -0.52, 0.78, 0),
+    transformGeo(makeCylinder(0.36, 0.36, 0.08, 14, 0.15), -0.52, 1.06, 0),
+    // Vertical Top High-Pressure Discharge Nozzle
+    transformGeo(makeCylinder(0.20, 0.20, 0.55, 14, 0.13), 0.52, 0.78, 0),
+    transformGeo(makeCylinder(0.36, 0.36, 0.08, 14, 0.13), 0.52, 1.06, 0),
+  ]);
+  parts.push({
+    name: 'BarrelOuterCasing',
+    mesh: barrelShell,
+    materialIndex: 11,
+    translation: [-0.85, 0.96, 0],
+    extras: { partId: 'barrel_casing', explodeDir: [0, 0.85, 0] },
+  });
+
+  // Heavy Bolted Forged Barrel End Cover + Pedestals
+  const barrelCover = mergeGeos([
+    transformGeo(makeCylinder(0.68, 0.68, 0.18, 20, 0.10), -0.88, 0, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.66, 0.66, 0.16, 20, 0.10), 0.88, 0, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeBox(0.30, 0.58, 0.96), -0.65, -0.58, 0),
+    transformGeo(makeBox(0.30, 0.58, 0.96), 0.65, -0.58, 0),
+  ]);
+  parts.push({
+    name: 'BarrelEndCover',
+    mesh: barrelCover,
+    materialIndex: 12,
+    translation: [-0.85, 0.96, 0],
+    extras: { partId: 'barrel_casing', explodeDir: [-0.95, 0, 0] },
+  });
+
+  // Extractable Multi-Stage Cartridge Rotor inside Barrel
+  const cartridgeGeos: GeometryData[] = [];
+  for (let i = 0; i < 6; i++) {
+    cartridgeGeos.push(transformGeo(makeImpellerGeometry('closed', 0.40, 5), -0.60 + i * 0.24, 0, 0));
+  }
+  parts.push({
+    name: 'InnerRotorCartridge',
+    mesh: mergeGeos(cartridgeGeos),
+    materialIndex: 2,
+    translation: [-0.85, 0.96, 0],
+    extras: { partId: 'multistage_impellers', explodeDir: [-0.8, 0.15, 0.75] },
+  });
+
+  parts.push({
+    name: 'PumpShaft',
+    mesh: transformGeo(makeCylinder(0.065, 0.065, 2.45, 14), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 1,
+    translation: [-0.38, 0.96, 0],
+    extras: { partId: 'shaft', explodeDir: [-0.4, 0.4, 0] },
+  });
+
+  parts.push({
+    name: 'Coupling',
+    mesh: transformGeo(makeCylinder(0.15, 0.15, 0.20, 14, 0.06), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 4,
+    translation: [0.56, 0.96, 0],
+    extras: { partId: 'coupling', explodeDir: [0, 0.7, 0] },
+  });
+
+  parts.push({
+    name: 'ElectricMotor',
+    mesh: makeElectricMotor(),
+    materialIndex: 7,
+    translation: [1.40, 0.96, 0],
+    extras: { partId: 'electric_motor', explodeDir: [0.75, 0, 0] },
+  });
+
+  return parts;
+}
+
+function buildVerticalPumpParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  // Heavy Inline Base Plinth + Inline Horizontal Suction & Discharge Flanges
+  const basePlinth = mergeGeos([
+    makeBox(1.55, 0.22, 1.10),
+    transformGeo(makeCylinder(0.22, 0.22, 0.52, 14, 0.16), -0.78, 0.28, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.34, 0.34, 0.07, 14, 0.16), -1.04, 0.28, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.22, 0.22, 0.52, 14, 0.16), 0.78, 0.28, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.34, 0.34, 0.07, 14, 0.16), 1.04, 0.28, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.56, 0.60, 0.36, 18), 0, 0.28, 0),
+  ]);
+  parts.push({
+    name: 'VerticalBasePlinth',
+    mesh: basePlinth,
+    materialIndex: 0,
+    translation: [0, 0.11, 0],
+    extras: { partId: 'baseplate', explodeDir: [0, -0.35, 0] },
+  });
+
+  // Semi-transparent vertical stainless outer sleeve showing internal vertical stages
+  parts.push({
+    name: 'VerticalOuterSleeve',
+    mesh: makeCylinder(0.46, 0.46, 1.35, 18, 0.40),
+    materialIndex: 11,
+    translation: [0, 1.24, 0],
+    extras: { partId: 'vertical_stages', explodeDir: [0, 0, 0.85] },
+  });
+
+  // 4 Vertical Impellers stacked vertically along Y-axis!
+  const vImpGeos: GeometryData[] = [];
+  for (let i = 0; i < 4; i++) {
+    vImpGeos.push(transformGeo(makeImpellerGeometry('closed', 0.35, 5), 0, -0.45 + i * 0.30, 0, 0, 0, Math.PI / 2));
+  }
+  parts.push({
+    name: 'VerticalImpellerStack',
+    mesh: mergeGeos(vImpGeos),
+    materialIndex: 2,
+    translation: [0, 1.24, 0],
+    extras: { partId: 'vertical_stages', explodeDir: [0, 0.2, 0.4] },
+  });
+
+  parts.push({
+    name: 'VerticalShaft',
+    mesh: makeCylinder(0.055, 0.055, 1.85, 12),
+    materialIndex: 1,
+    translation: [0, 1.48, 0],
+    extras: { partId: 'shaft', explodeDir: [0, 0.4, 0] },
+  });
+
+  // Motor Stool & Vertical Coupling
+  parts.push({
+    name: 'VerticalCoupling',
+    mesh: mergeGeos([
+      makeCylinder(0.32, 0.42, 0.32, 16, 0.24),
+      makeCylinder(0.13, 0.13, 0.18, 14),
+    ]),
+    materialIndex: 4,
+    translation: [0, 2.08, 0],
+    extras: { partId: 'coupling', explodeDir: [0, 0.65, 0] },
+  });
+
+  // Vertical Electric Motor on top
+  parts.push({
+    name: 'VerticalMotorHead',
+    mesh: transformGeo(makeElectricMotor(), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 7,
+    translation: [0, 2.86, 0],
+    extras: { partId: 'vertical_motor', explodeDir: [0, 1.0, 0] },
+  });
+
+  return parts;
+}
+
+function buildAxialMixedPumpParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  parts.push({
+    name: 'ComparisonBase',
+    mesh: makeBox(4.1, 0.12, 1.45),
+    materialIndex: 3,
+    translation: [0, 0.06, 0],
+  });
+
+  // LEFT: Axial Flow Propeller Pump (flow parallel to shaft!)
+  const axialCasing = mergeGeos([
+    transformGeo(makeCylinder(0.55, 0.55, 1.45, 20, 0.48), 0, 0, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.64, 0.64, 0.07, 18, 0.48), -0.72, 0, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.64, 0.64, 0.07, 18, 0.48), 0.72, 0, 0, 0, 0, Math.PI / 2),
+  ]);
+  parts.push({
+    name: 'AxialTubularCasing',
+    mesh: axialCasing,
+    materialIndex: 11,
+    translation: [-1.10, 0.90, 0],
+    extras: { partId: 'axial_propeller', explodeDir: [0, 0.7, 0] },
+  });
+
+  // 4-blade twisted Axial Propeller Rotor
+  const propParts: GeometryData[] = [
+    transformGeo(makeCylinder(0.14, 0.14, 0.46, 14), 0, 0, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.04, 0.14, 0.22, 12), -0.34, 0, 0, 0, 0, Math.PI / 2), // Nose cone
+  ];
+  for (let b = 0; b < 4; b++) {
+    const a = (b / 4) * Math.PI * 2;
+    propParts.push(
+      transformGeo(makeBox(0.24, 0.36, 0.04), 0, 0.29 * Math.cos(a), 0.29 * Math.sin(a), -a, 0.55, 0),
+    );
+  }
+  parts.push({
+    name: 'AxialPropeller',
+    mesh: mergeGeos(propParts),
+    materialIndex: 2,
+    translation: [-1.10, 0.90, 0],
+    extras: { partId: 'axial_propeller', explodeDir: [0, 0, 0.6] },
+  });
+
+  parts.push({
+    name: 'AxialFlowArrow',
+    mesh: transformGeo(makeArrowGeo(0.85), -1.45, 1.56, 0, 0, 0, -Math.PI / 2),
+    materialIndex: 8,
+    extras: { partId: 'axial_propeller' },
+  });
+
+  // RIGHT: Mixed Flow Pump (conical impeller discharging at > 90 deg!)
+  const mixedCasing = mergeGeos([
+    transformGeo(makeCylinder(0.68, 0.44, 1.10, 20, 0.38), 0, 0, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.75, 0.75, 0.07, 18, 0.55), 0.55, 0, 0, 0, 0, Math.PI / 2),
+    transformGeo(makeCylinder(0.52, 0.52, 0.07, 18, 0.38), -0.55, 0, 0, 0, 0, Math.PI / 2),
+  ]);
+  parts.push({
+    name: 'MixedConicalCasing',
+    mesh: mixedCasing,
+    materialIndex: 11,
+    translation: [1.05, 0.90, 0],
+    extras: { partId: 'mixed_flow_rotor', explodeDir: [0, 0.7, 0] },
+  });
+
+  const mixedParts: GeometryData[] = [
+    transformGeo(makeCylinder(0.44, 0.16, 0.46, 16), 0, 0, 0, 0, 0, Math.PI / 2),
+  ];
+  for (let b = 0; b < 6; b++) {
+    const a = (b / 6) * Math.PI * 2;
+    mixedParts.push(
+      transformGeo(makeBox(0.32, 0.28, 0.04), 0.05, 0.34 * Math.cos(a), 0.34 * Math.sin(a), -a, 0.4, -0.45),
+    );
+  }
+  parts.push({
+    name: 'MixedFlowRotor',
+    mesh: mergeGeos(mixedParts),
+    materialIndex: 4,
+    translation: [1.05, 0.90, 0],
+    extras: { partId: 'mixed_flow_rotor', explodeDir: [0, 0, 0.6] },
+  });
+
+  parts.push({
+    name: 'MixedFlowArrow',
+    mesh: transformGeo(makeArrowGeo(0.75), 0.75, 1.48, 0, 0, 0, -Math.PI / 3.2),
+    materialIndex: 10,
+    extras: { partId: 'mixed_flow_rotor' },
+  });
+
+  return parts;
+}
+
+function buildReciprocatingPumpParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  parts.push({
+    name: 'Baseplate',
+    mesh: makeBox(3.8, 0.14, 1.35),
+    materialIndex: 3,
+    translation: [0, 0.07, 0],
+    extras: { partId: 'baseplate' },
+  });
+
+  // Heavy Crankcase Frame (Left)
+  parts.push({
+    name: 'CrankcaseFrame',
+    mesh: mergeGeos([
+      makeBox(1.05, 0.85, 0.85),
+      transformGeo(makeCylinder(0.44, 0.44, 0.82, 16), 0, 0.18, 0, Math.PI / 2, 0, 0),
+    ]),
+    materialIndex: 13,
+    translation: [-1.15, 0.56, 0],
+    extras: { partId: 'reciprocating_piston', explodeDir: [-0.6, 0, 0] },
+  });
+
+  // Rotating Crankshaft & Crank Pin
+  parts.push({
+    name: 'Crankshaft',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.30, 0.30, 0.14, 18), 0, 0, 0, Math.PI / 2, 0, 0),
+      transformGeo(makeCylinder(0.06, 0.06, 0.34, 10), 0.18, 0.14, 0, Math.PI / 2, 0, 0),
+    ]),
+    materialIndex: 1,
+    translation: [-1.05, 0.74, 0.44],
+    extras: { partId: 'reciprocating_piston' },
+  });
+
+  // Connecting Rod + Horizontal Plunger/Piston inside cutaway fluid cylinder!
+  parts.push({
+    name: 'ReciprocatingPiston',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.055, 0.055, 0.95, 12), -0.35, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeCylinder(0.22, 0.22, 0.24, 18), 0.15, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeTorus(0.225, 0.024, 16, 8), 0.10, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeTorus(0.225, 0.024, 16, 8), 0.20, 0, 0, 0, 0, Math.PI / 2),
+    ]),
+    materialIndex: 2,
+    translation: [-0.20, 0.74, 0],
+    extras: { partId: 'reciprocating_piston', explodeDir: [0, 0.5, 0.5] },
+  });
+
+  // Cutaway Glass Fluid End Cylinder + Valve Block
+  parts.push({
+    name: 'FluidCylinder',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.30, 0.30, 1.05, 18, 0.25), 0.22, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeBox(0.55, 0.68, 0.62), 0.85, 0, 0), // Valve chest
+      transformGeo(makeCylinder(0.16, 0.16, 0.42, 12, 0.12), 0.85, -0.45, 0), // Suction port
+      transformGeo(makeCylinder(0.15, 0.15, 0.42, 12, 0.11), 0.85, 0.52, 0), // Discharge port
+    ]),
+    materialIndex: 11,
+    translation: [0.05, 0.74, 0],
+    extras: { partId: 'reciprocating_piston', explodeDir: [0.4, 0, 0] },
+  });
+
+  // Prominent Pulsation Dampener (Air Vessel) mounted on Discharge Manifold (PDF p. 11)
+  parts.push({
+    name: 'PulsationDampener',
+    mesh: mergeGeos([
+      makeCylinder(0.14, 0.14, 0.28, 12),
+      transformGeo(makeCylinder(0.28, 0.28, 0.45, 16), 0, 0.34, 0),
+      transformGeo(makeSphere(0.28, 14, 10), 0, 0.56, 0),
+    ]),
+    materialIndex: 9,
+    translation: [0.90, 1.32, 0],
+    extras: { partId: 'pulsation_dampener', explodeDir: [0, 0.85, 0] },
+  });
+
+  // Safety Relief Valve on discharge
+  parts.push({
+    name: 'SafetyReliefValve',
+    mesh: mergeGeos([
+      makeCylinder(0.11, 0.11, 0.30, 12),
+      transformGeo(makeCoilSpring(0.08, 0.015, 4, 0.22, 28), 0, 0.26, 0),
+      transformGeo(makeCylinder(0.14, 0.14, 0.08, 12), 0, 0.40, 0),
+    ]),
+    materialIndex: 4,
+    translation: [1.35, 1.05, 0.22],
+    extras: { partId: 'safety_relief_valve', explodeDir: [0.4, 0.6, 0.3] },
+  });
+
+  return parts;
+}
+
+function buildGearPumpParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  parts.push({
+    name: 'Baseplate',
+    mesh: makeBox(3.5, 0.14, 1.3),
+    materialIndex: 3,
+    translation: [0.1, 0.07, 0],
+    extras: { partId: 'baseplate' },
+  });
+
+  // Cutaway Glass Figure-8 Gear Housing with Suction (bottom/back) & Discharge (top/front)
+  parts.push({
+    name: 'GearCasingCutaway',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.42, 0.42, 0.42, 18, 0.36), 0, 0.22, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeCylinder(0.42, 0.42, 0.42, 18, 0.36), 0, -0.22, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeCylinder(0.16, 0.16, 0.48, 12, 0.12), 0, 0, -0.58, Math.PI / 2, 0, 0), // Suction port
+      transformGeo(makeCylinder(0.16, 0.16, 0.48, 12, 0.12), 0, 0, 0.58, Math.PI / 2, 0, 0), // Discharge port
+    ]),
+    materialIndex: 11,
+    translation: [-0.95, 0.88, 0],
+    extras: { partId: 'gear_pump_gears', explodeDir: [-0.65, 0.4, 0] },
+  });
+
+  // Upper Drive Spur Gear (10 teeth, 0 phase)
+  parts.push({
+    name: 'DriveGear',
+    mesh: makeSpurGearGeo(0.24, 0.30, 10, 0.055, 0),
+    materialIndex: 2,
+    translation: [-0.95, 1.10, 0],
+    extras: { partId: 'gear_pump_gears', explodeDir: [-0.3, 0.65, 0.4] },
+  });
+
+  // Lower Idler Driven Spur Gear (10 teeth, offset by PI/10 for clean intermeshing!)
+  parts.push({
+    name: 'DrivenGear',
+    mesh: makeSpurGearGeo(0.24, 0.30, 10, 0.055, Math.PI / 10),
+    materialIndex: 4,
+    translation: [-0.95, 0.64, 0],
+    extras: { partId: 'gear_pump_gears', explodeDir: [-0.3, -0.35, 0.4] },
+  });
+
+  parts.push({
+    name: 'PumpShaft',
+    mesh: transformGeo(makeCylinder(0.055, 0.055, 1.35, 14), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 1,
+    translation: [-0.32, 1.10, 0],
+    extras: { partId: 'shaft' },
+  });
+
+  // Integral Safety Relief Valve on Gear Casing
+  parts.push({
+    name: 'SafetyReliefValve',
+    mesh: mergeGeos([
+      makeCylinder(0.11, 0.11, 0.28, 12),
+      transformGeo(makeCylinder(0.15, 0.15, 0.08, 12), 0, 0.18, 0),
+    ]),
+    materialIndex: 9,
+    translation: [-0.95, 1.48, 0.25],
+    extras: { partId: 'safety_relief_valve', explodeDir: [0, 0.75, 0] },
+  });
+
+  parts.push({
+    name: 'Coupling',
+    mesh: transformGeo(makeCylinder(0.14, 0.14, 0.18, 14, 0.055), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 4,
+    translation: [0.38, 1.10, 0],
+    extras: { partId: 'coupling' },
+  });
+
+  parts.push({
+    name: 'ElectricMotor',
+    mesh: makeElectricMotor(),
+    materialIndex: 7,
+    translation: [1.18, 1.00, 0],
+    extras: { partId: 'electric_motor', explodeDir: [0.7, 0, 0] },
+  });
+
+  return parts;
+}
+
+function buildScrewPumpParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  parts.push({
+    name: 'Baseplate',
+    mesh: makeBox(4.0, 0.14, 1.35),
+    materialIndex: 3,
+    translation: [0.05, 0.07, 0],
+    extras: { partId: 'baseplate' },
+  });
+
+  // Cutaway Elongated Barrel showing twin helical screws inside
+  parts.push({
+    name: 'ScrewBarrelCutaway',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.46, 0.46, 1.45, 18, 0.40), 0, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeCylinder(0.22, 0.22, 0.42, 14, 0.16), -0.45, 0.56, 0), // Suction
+      transformGeo(makeCylinder(0.20, 0.20, 0.42, 14, 0.14), 0.45, 0.56, 0), // Discharge
+    ]),
+    materialIndex: 11,
+    translation: [-0.95, 0.88, 0],
+    extras: { partId: 'helical_screws', explodeDir: [0, 0.85, 0] },
+  });
+
+  // Timing Gear Housing + Pedestals
+  parts.push({
+    name: 'TimingGearBox',
+    mesh: mergeGeos([
+      makeBox(0.36, 0.68, 0.72),
+      transformGeo(makeBox(0.32, 0.45, 0.78), 0, -0.48, 0),
+    ]),
+    materialIndex: 12,
+    translation: [-0.08, 0.88, 0],
+    extras: { partId: 'bearing_housing', explodeDir: [0, -0.2, -0.6] },
+  });
+
+  // Twin Intermeshing Helical Screws
+  parts.push({
+    name: 'HelicalScrewA',
+    mesh: makeHelicalScrewGeo(0.21, 1.36, 3.2, 1),
+    materialIndex: 2,
+    translation: [-0.95, 0.88, 0.16],
+    extras: { partId: 'helical_screws', explodeDir: [-0.45, 0.2, 0.5] },
+  });
+
+  parts.push({
+    name: 'HelicalScrewB',
+    mesh: makeHelicalScrewGeo(0.21, 1.36, 3.2, -1),
+    materialIndex: 1,
+    translation: [-0.95, 0.88, -0.16],
+    extras: { partId: 'helical_screws', explodeDir: [-0.45, 0.2, -0.5] },
+  });
+
+  parts.push({
+    name: 'Coupling',
+    mesh: transformGeo(makeCylinder(0.14, 0.14, 0.20, 14, 0.055), 0, 0, 0, 0, 0, Math.PI / 2),
+    materialIndex: 4,
+    translation: [0.36, 0.88, 0.16],
+    extras: { partId: 'coupling' },
+  });
+
+  parts.push({
+    name: 'ElectricMotor',
+    mesh: makeElectricMotor(),
+    materialIndex: 7,
+    translation: [1.22, 0.88, 0.10],
+    extras: { partId: 'electric_motor', explodeDir: [0.75, 0, 0] },
+  });
+
+  return parts;
+}
+
+function buildLobeVanePumpParts(): GlbPartDef[] {
+  const parts: GlbPartDef[] = [];
+
+  parts.push({
+    name: 'ComparisonBase',
+    mesh: makeBox(3.8, 0.12, 1.35),
+    materialIndex: 3,
+    translation: [0, 0.06, 0],
+  });
+
+  // LEFT: Rotary Lobe Pump (Twin 3-lobe synchronized rotors inside cutaway figure-8 housing)
+  parts.push({
+    name: 'LobeChamberCutaway',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.46, 0.46, 0.44, 18, 0.40), 0, 0.24, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeCylinder(0.46, 0.46, 0.44, 18, 0.40), 0, -0.24, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeCylinder(0.16, 0.16, 0.42, 12, 0.12), 0, 0, -0.58, Math.PI / 2, 0, 0),
+      transformGeo(makeCylinder(0.16, 0.16, 0.42, 12, 0.12), 0, 0, 0.58, Math.PI / 2, 0, 0),
+    ]),
+    materialIndex: 11,
+    translation: [-1.05, 0.88, 0],
+    extras: { partId: 'rotary_lobes', explodeDir: [-0.4, 0.7, 0] },
+  });
+
+  parts.push({
+    name: 'RotaryLobeA',
+    mesh: makeLobeRotorGeo(0.28, 0.34, 3, 0),
+    materialIndex: 2,
+    translation: [-1.05, 1.12, 0],
+    extras: { partId: 'rotary_lobes', explodeDir: [-0.3, 0.4, 0.5] },
+  });
+
+  parts.push({
+    name: 'RotaryLobeB',
+    mesh: makeLobeRotorGeo(0.28, 0.34, 3, Math.PI / 3),
+    materialIndex: 4,
+    translation: [-1.05, 0.64, 0],
+    extras: { partId: 'rotary_lobes', explodeDir: [-0.3, -0.3, 0.5] },
+  });
+
+  // RIGHT: Sliding Vane Pump (Eccentric rotor + sliding radial vanes inside circular cam ring)
+  parts.push({
+    name: 'VaneCamRing',
+    mesh: mergeGeos([
+      transformGeo(makeCylinder(0.64, 0.64, 0.46, 20, 0.54), 0, 0, 0, 0, 0, Math.PI / 2),
+      transformGeo(makeCylinder(0.16, 0.16, 0.40, 12, 0.12), 0, 0, -0.72, Math.PI / 2, 0, 0),
+      transformGeo(makeCylinder(0.16, 0.16, 0.40, 12, 0.12), 0, 0, 0.72, Math.PI / 2, 0, 0),
+    ]),
+    materialIndex: 11,
+    translation: [1.05, 0.88, 0],
+    extras: { partId: 'sliding_vane_rotor', explodeDir: [0.4, 0.7, 0] },
+  });
+
+  // Eccentrically mounted slotted rotor with 6 sliding blades
+  const vaneParts: GeometryData[] = [
+    transformGeo(makeCylinder(0.32, 0.32, 0.36, 18, 0.07), 0, 0, 0, 0, 0, Math.PI / 2),
+  ];
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2;
+    vaneParts.push(
+      transformGeo(makeBox(0.34, 0.28, 0.035), 0, 0.36 * Math.cos(a), 0.36 * Math.sin(a), -a, 0, 0),
+    );
+  }
+  parts.push({
+    name: 'SlidingVaneRotor',
+    mesh: mergeGeos(vaneParts),
+    materialIndex: 1,
+    translation: [1.05, 0.76, 0.06], // Eccentric offset inside cam ring!
+    extras: { partId: 'sliding_vane_rotor', explodeDir: [0.4, 0.2, 0.5] },
+  });
+
+  return parts;
+}
+
 export function buildGlbBuffer(modelId: GlbModelId): Uint8Array {
   switch (modelId) {
     case 'complete_pump':
@@ -1075,6 +1891,24 @@ export function buildGlbBuffer(modelId: GlbModelId): Uint8Array {
       return encodeGlb(buildWaterHammerParts());
     case 'alignment_model':
       return encodeGlb(buildAlignmentParts());
+    case 'multistage_pump':
+      return encodeGlb(buildMultistagePumpParts());
+    case 'split_case_double_suction':
+      return encodeGlb(buildSplitCaseDoubleSuctionParts());
+    case 'barrel_pump':
+      return encodeGlb(buildBarrelPumpParts());
+    case 'vertical_pump':
+      return encodeGlb(buildVerticalPumpParts());
+    case 'axial_mixed_pump':
+      return encodeGlb(buildAxialMixedPumpParts());
+    case 'reciprocating_pump':
+      return encodeGlb(buildReciprocatingPumpParts());
+    case 'gear_pump':
+      return encodeGlb(buildGearPumpParts());
+    case 'screw_pump':
+      return encodeGlb(buildScrewPumpParts());
+    case 'lobe_vane_pump':
+      return encodeGlb(buildLobeVanePumpParts());
   }
 }
 
@@ -1114,6 +1948,15 @@ export function generateAllGlbBase64Map(): Record<GlbModelId, string> {
     'cavitation_model',
     'water_hammer',
     'alignment_model',
+    'multistage_pump',
+    'split_case_double_suction',
+    'barrel_pump',
+    'vertical_pump',
+    'axial_mixed_pump',
+    'reciprocating_pump',
+    'gear_pump',
+    'screw_pump',
+    'lobe_vane_pump',
   ];
   const map = {} as Record<GlbModelId, string>;
   for (const id of ids) {

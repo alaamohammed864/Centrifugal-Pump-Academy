@@ -22,7 +22,7 @@ async function main() {
   }
   const compiledCss = fs.readFileSync(path.join(distAssetsDir, cssFile), 'utf8');
 
-  console.log('2. Generating 8 embedded binary GLB 3D models in Base64...');
+  console.log('2. Generating 17 embedded binary GLB 3D models in Base64...');
   const glbMap = generateAllGlbBase64Map();
   const glbJsonSafe = JSON.stringify(glbMap).replace(/</g, '\\u003c');
 

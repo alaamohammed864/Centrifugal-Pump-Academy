@@ -23,61 +23,172 @@ import { base64ToArrayBuffer, buildGlbBuffer, uint8ToBase64 } from '../engine/gl
 import { PUMP_PARTS_CATALOG } from '../data/lessons';
 import { Pump2DSchematic } from './Pump2DSchematic';
 
+export type GlbCategory = 'all' | 'components' | 'centrifugal' | 'pd';
+
 export const GLB_MODELS_META: {
   id: GlbModelId;
+  category: Exclude<GlbCategory, 'all'>;
   arTitle: string;
   enTitle: string;
   desc: string;
 }[] = [
   {
     id: 'complete_pump',
-    arTitle: 'مضخة الطرد المركزي الكاملة',
-    enTitle: 'Complete Centrifugal Pump Unit',
-    desc: 'وحدة ضخ متكاملة على قاعدة مشتركة مع خطوط السحب والدفع والمحرك الكهربائي.',
+    category: 'centrifugal',
+    arTitle: 'طرد مركزي أحادية (كاملة)',
+    enTitle: 'Single-Stage End-Suction Centrifugal Pump',
+    desc: 'مضخة الطرد المركزي أحادية المرحلة (جريان نصف قطري) على قاعدة مشتركة مع خطوط السحب والدفع والمحرك.',
+  },
+  {
+    id: 'multistage_pump',
+    category: 'centrifugal',
+    arTitle: 'متعددة المراحل (أفقية)',
+    enTitle: 'Horizontal Multistage Centrifugal Pump',
+    desc: '5 دفاعات مركبة على التوالي لرفع الضغط العالي جداً في تغذية المراجل وحقن المياه.',
+  },
+  {
+    id: 'split_case_double_suction',
+    category: 'centrifugal',
+    arTitle: 'منقسمة أفقياً / مزدوجة السحب',
+    enTitle: 'Horizontal Split Case & Double-Suction',
+    desc: 'غلاف علوي قابل للرفع دون فك الأنابيب مع دفاعة مزدوجة السحب متزنة محورياً.',
+  },
+  {
+    id: 'barrel_pump',
+    category: 'centrifugal',
+    arTitle: 'ذات الغلاف البرميلي (BB5)',
+    enTitle: 'High-Pressure Barrel Casing Pump',
+    desc: 'غلاف برميلي فولاذي سميك للضغوط الفائقة مع حزمة مراحل داخلية قابلة للسحب.',
+  },
+  {
+    id: 'vertical_pump',
+    category: 'centrifugal',
+    arTitle: 'المضخة الرأسية (العمودية)',
+    enTitle: 'Vertical Multistage / Vertical Shaft Pump',
+    desc: 'مراحل ضخ عمودية فوق بعضها ومحرك رأسي لتوفير المساحة الأرضية في المحطات.',
+  },
+  {
+    id: 'axial_mixed_pump',
+    category: 'centrifugal',
+    arTitle: 'جريان محوري ومزدوج',
+    enTitle: 'Axial Flow & Mixed Flow Pumps',
+    desc: 'مقارنة بين المضخة المروحية المحورية (تدفق عالٍ/ضغط واطئ) والجريان المزدوج (>90°).',
+  },
+  {
+    id: 'reciprocating_pump',
+    category: 'pd',
+    arTitle: 'ترددية (مكبس / غطاس)',
+    enTitle: 'Reciprocating Piston / Plunger Pump',
+    desc: 'ضخ إزاحة موجبة بحركة المكبس مع مخمد النبض (Air Vessel) وصمام الأمان.',
+  },
+  {
+    id: 'gear_pump',
+    category: 'pd',
+    arTitle: 'مضخة التروس (Gear)',
+    enTitle: 'External Gear Positive Displacement Pump',
+    desc: 'ترسان متعشقان يدوران بعكس الاتجاه لضخ الزيوت الثقيلة عالية اللزوجة بسلاسة.',
+  },
+  {
+    id: 'screw_pump',
+    category: 'pd',
+    arTitle: 'المضخة اللولبية (Screw)',
+    enTitle: 'Twin-Screw Positive Displacement Pump',
+    desc: 'لولبان حلزونيان متداخلان لنقل النفط الثقيل والسوائل اللزجة دون نبضات.',
+  },
+  {
+    id: 'lobe_vane_pump',
+    category: 'pd',
+    arTitle: 'الفصية والريشية الدوارة',
+    enTitle: 'Rotary Lobe & Sliding Vane Pumps',
+    desc: 'مقارنة بين الفصوص المتزامنة والريش المنزلقة داخل الدوار اللامركزي.',
   },
   {
     id: 'exploded_pump',
-    arTitle: 'نموذج تفكيك المضخة (Exploded)',
+    category: 'components',
+    arTitle: 'تفكيك المضخة (Exploded)',
     enTitle: 'Exploded Pump Assembly',
     desc: 'اسحب شريط التفكيك أو اضغط على أي جزء لفحص وظيفته وأعطاله وأساليب صيانته.',
   },
   {
     id: 'impeller_types',
-    arTitle: 'مقارنة أنواع الدفاعات الثلاثة',
+    category: 'components',
+    arTitle: 'مقارنة الدفاعات الثلاثة',
     enTitle: 'Open vs Semi-Open vs Closed Impellers',
     desc: 'مقارنة هندسية مباشرة بين الدفاعة المفتوحة ونصف المفتوحة والمغلقة.',
   },
   {
     id: 'bearings_loads',
-    arTitle: 'المحامل والأحمال القطرية والمحورية',
+    category: 'components',
+    arTitle: 'المحامل والأحمال',
     enTitle: 'Bearings & Radial/Axial Loads',
     desc: 'تمثيل لمحمل الكرات القطري ومحمل الدفع المحوري وأسهم اتجاه الأحمال.',
   },
   {
     id: 'mechanical_seal',
+    category: 'components',
     arTitle: 'السداد الميكانيكي المفكك',
     enTitle: 'Mechanical Seal Exploded Assembly',
     desc: 'الأجزاء الدقيقة للسداد: الحلقة الثابتة، الدوارة، O-Ring، النابض، وحلقة الدفع.',
   },
   {
     id: 'cavitation_model',
-    arTitle: 'محاكاة التكهف وتآكل الريش',
+    category: 'components',
+    arTitle: 'التكهف وتآكل الريش',
     enTitle: 'Cavitation Bubbles & Pitting Erosion',
     desc: 'تكون فقاعات البخار عند عين الدفاعة وانهيارها العنيف مع مناطق النقر المعدني.',
   },
   {
     id: 'water_hammer',
-    arTitle: 'المطرقة المائية (موجة الصدمة)',
+    category: 'components',
+    arTitle: 'المطرقة المائية',
     enTitle: 'Water Hammer Pressure Surge',
     desc: 'الإغلاق المفاجئ لصمام الدفع وارتداد موجة الضغط العالي في الأنبوب.',
   },
   {
     id: 'alignment_model',
-    arTitle: 'محاذاة المضخة والمحرك والليزر',
+    category: 'components',
+    arTitle: 'محاذاة المضخة والليزر',
     enTitle: 'Shaft Alignment & Misalignment Modes',
     desc: 'محاكاة بصرية للانحراف الزاوي والموازي والمركب مع جهاز المحاذاة الليزري.',
   },
 ];
+
+const NODE_AR_LABELS: Record<string, string> = {
+  Baseplate: 'القاعدة المعدنية المشتركة (Baseplate)',
+  PumpVolute: 'الغلاف الحلزوني (Volute)',
+  SuctionNozzle: 'فوهة السحب (Suction Nozzle)',
+  DischargeNozzle: 'فوهة الدفع (Discharge Nozzle)',
+  Impeller: 'الدفاعة (Impeller)',
+  PumpShaft: 'عمود الإدارة (Shaft)',
+  Coupling: 'قارنة الربط (Coupling)',
+  BearingHousing: 'بيت المحامل (Bearing Housing)',
+  MechanicalSeal: 'السداد الميكانيكي (Mechanical Seal)',
+  MotorUnit: 'المحرك الكهربائي (Motor)',
+  ElectricMotor: 'المحرك الكهربائي (Motor)',
+  CrankcaseFrame: 'علبة المرفق (Crankcase)',
+  Crankshaft: 'عمود المرفق (Crankshaft)',
+  FluidCylinder: 'أسطوانة الضخ (Fluid Cylinder)',
+  DriveGear: 'الترس القائد (Drive Gear)',
+  DrivenGear: 'الترس المنقاد (Driven Gear)',
+  GearCasing: 'غلاف مضخة التروس',
+  HelicalScrewA: 'اللولب القائد (Drive Screw)',
+  HelicalScrewB: 'اللولب المنقاد (Driven Screw)',
+  ScrewCasing: 'غلاف المضخة اللولبية',
+  RotaryLobeA: 'الفص الدوار الأول (Lobe A)',
+  RotaryLobeB: 'الفص الدوار الثاني (Lobe B)',
+  LobeCasing: 'غلاف المضخة الفصية',
+  SlidingVaneCasing: 'غلاف المضخة الريشية',
+  VerticalPumpColumn: 'عمود التوجيه الرأسي (Column)',
+  VerticalShaft: 'عمود الإدارة الرأسي',
+  VerticalCoupling: 'القارنة الرأسية',
+  AxialCasingShroud: 'غلاف الجريان المحوري',
+  MixedFlowCasing: 'غلاف الجريان المزدوج',
+  InnerRotorCartridge: 'حزمة الدوار الداخلية (Cartridge)',
+  BarrelBoltedCover: 'الغطاء المثبت بالبراغي',
+  MultistageSuctionCover: 'غطاء السحب الأمامي',
+  MultistageDischargeCover: 'غطاء الدفع الخلفي',
+  DoubleSuctionVolute: 'الغلاف الحلزوني مزدوج السحب',
+};
 
 // Global cache of Base64 strings so generating + encoding happens lazily once per model
 const glbBase64Cache = new Map<GlbModelId, string>();
@@ -109,6 +220,7 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
   compactMode = false,
 }) => {
   const [activeModel, setActiveModel] = useState<GlbModelId>(initialModelId);
+  const [categoryFilter, setCategoryFilter] = useState<GlbCategory>('all');
   const [explodePct, setExplodePct] = useState<number>(initialModelId === 'exploded_pump' ? 55 : 0);
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [lightMode3D, setLightMode3D] = useState<boolean>(false);
@@ -328,23 +440,95 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
                 obj.rotation.x += 0.06;
                 needsNext = true;
               }
+            } else if (id === 'multistage_pump') {
+              if (obj.name === 'MultistageImpellerStack' || obj.name === 'PumpShaft' || obj.name === 'Coupling') {
+                obj.rotation.x += 0.06;
+                needsNext = true;
+              }
+            } else if (id === 'split_case_double_suction') {
+              if (obj.name === 'DoubleSuctionImpeller' || obj.name === 'PumpShaft' || obj.name === 'Coupling') {
+                obj.rotation.x += 0.055;
+                needsNext = true;
+              }
+            } else if (id === 'barrel_pump') {
+              if (obj.name === 'InnerRotorCartridge' || obj.name === 'PumpShaft' || obj.name === 'Coupling') {
+                obj.rotation.x += 0.06;
+                needsNext = true;
+              }
+            } else if (id === 'vertical_pump') {
+              if (obj.name === 'VerticalImpellerStack' || obj.name === 'VerticalShaft' || obj.name === 'VerticalCoupling') {
+                obj.rotation.y += 0.06;
+                needsNext = true;
+              }
+            } else if (id === 'axial_mixed_pump') {
+              if (obj.name === 'AxialPropeller' || obj.name === 'MixedFlowRotor') {
+                obj.rotation.x += 0.055;
+                needsNext = true;
+              }
+            } else if (id === 'reciprocating_pump') {
+              if (obj.name === 'Crankshaft') {
+                obj.rotation.z -= 0.06;
+                needsNext = true;
+              } else if (obj.name === 'ReciprocatingPiston') {
+                const base = st.basePositions.get(obj);
+                if (base) {
+                  const factor = st.explodePct / 100;
+                  const dir = (obj.userData?.explodeDir as [number, number, number] | undefined) ?? [0, 0, 0];
+                  obj.position.x = base.x + dir[0] * factor + Math.sin(t * 4.5) * 0.14;
+                }
+                needsNext = true;
+              }
+            } else if (id === 'gear_pump') {
+              if (obj.name === 'DriveGear' || obj.name === 'PumpShaft' || obj.name === 'Coupling') {
+                obj.rotation.x += 0.05;
+                needsNext = true;
+              } else if (obj.name === 'DrivenGear') {
+                obj.rotation.x -= 0.05;
+                needsNext = true;
+              }
+            } else if (id === 'screw_pump') {
+              if (obj.name === 'HelicalScrewA' || obj.name === 'Coupling') {
+                obj.rotation.x += 0.06;
+                needsNext = true;
+              } else if (obj.name === 'HelicalScrewB') {
+                obj.rotation.x -= 0.06;
+                needsNext = true;
+              }
+            } else if (id === 'lobe_vane_pump') {
+              if (obj.name === 'RotaryLobeA' || obj.name === 'SlidingVaneRotor') {
+                obj.rotation.x += 0.045;
+                needsNext = true;
+              } else if (obj.name === 'RotaryLobeB') {
+                obj.rotation.x -= 0.045;
+                needsNext = true;
+              }
             } else if (id === 'impeller_types') {
               if (obj.name.endsWith('Impeller')) {
                 obj.rotation.x += 0.035;
                 needsNext = true;
               }
             } else if (id === 'bearings_loads') {
-              if (obj.name === 'PumpShaft' || obj.name === 'BallBearing' || obj.name === 'ThrustBearing') {
+              if (
+                obj.name === 'PumpShaft' ||
+                obj.name === 'BallBearing_Radial' ||
+                obj.name === 'RollerBearing_HeavyRadial' ||
+                obj.name === 'ThrustBearing_Axial'
+              ) {
                 obj.rotation.x += 0.04;
                 needsNext = true;
               }
             } else if (id === 'mechanical_seal') {
-              if (obj.name === 'ShaftAndSleeve' || obj.name === 'PrimaryRotatingRing' || obj.name === 'DriveRing') {
+              if (
+                obj.name === 'ShaftSection' ||
+                obj.name === 'PrimarySealingRing_Rotary' ||
+                obj.name === 'RetainerAndDriveRing' ||
+                obj.name === 'CoilSpring'
+              ) {
                 obj.rotation.x += 0.045;
                 needsNext = true;
               }
             } else if (id === 'cavitation_model') {
-              if (obj.name === 'ImpellerCutaway') {
+              if (obj.name === 'Impeller') {
                 obj.rotation.x += 0.055;
                 needsNext = true;
               } else if (obj.name.startsWith('VaporBubble_')) {
@@ -554,9 +738,12 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
 
         // Camera framing per model
         if (st.camera && st.controls) {
-          if (activeModel === 'impeller_types') {
-            st.camera.position.set(0, 2.2, 4.4);
-            st.controls.target.set(0, 0.7, 0);
+          if (activeModel === 'impeller_types' || activeModel === 'axial_mixed_pump' || activeModel === 'lobe_vane_pump') {
+            st.camera.position.set(0, 2.2, 4.5);
+            st.controls.target.set(0, 0.8, 0);
+          } else if (activeModel === 'vertical_pump') {
+            st.camera.position.set(2.9, 2.5, 4.4);
+            st.controls.target.set(0, 1.55, 0);
           } else if (activeModel === 'mechanical_seal') {
             st.camera.position.set(1.6, 1.5, 2.9);
             st.controls.target.set(0, 0.7, 0);
@@ -589,11 +776,21 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
     [activeModel],
   );
 
+  const visibleModels = useMemo(
+    () => (categoryFilter === 'all' ? GLB_MODELS_META : GLB_MODELS_META.filter((m) => m.category === categoryFilter)),
+    [categoryFilter],
+  );
+
   const handleResetView = () => {
     const st = sceneStateRef.current;
     if (st.camera && st.controls) {
-      st.camera.position.set(3.5, 2.55, 5.0);
-      st.controls.target.set(0, 1.05, 0);
+      if (activeModel === 'vertical_pump') {
+        st.camera.position.set(2.9, 2.5, 4.4);
+        st.controls.target.set(0, 1.55, 0);
+      } else {
+        st.camera.position.set(3.5, 2.55, 5.0);
+        st.controls.target.set(0, 1.05, 0);
+      }
       st.controls.update();
       st.requestRender();
     }
@@ -623,10 +820,55 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Model Selector Strip (Horizontal scroll on mobile so 3D canvas stays visible above fold) */}
-      <div className="flex flex-col gap-2 rounded-lg border border-slate-300 bg-white p-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
+      {/* Category Filter + Model Selector Strip (Horizontal scroll on mobile so 3D canvas stays visible above fold) */}
+      <div className="flex flex-col gap-2 rounded-lg border border-slate-300 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2 dark:border-slate-800">
+          <div className="flex flex-nowrap items-center gap-1 overflow-x-auto sm:flex-wrap sm:overflow-visible">
+            {(
+              [
+                ['all', `الكل (${GLB_MODELS_META.length})`],
+                ['centrifugal', 'أنواع الطرد المركزي (6)'],
+                ['pd', 'مضخات الإزاحة الموجبة (4)'],
+                ['components', 'المكونات والظواهر (7)'],
+              ] as const
+            ).map(([cat, label]) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategoryFilter(cat)}
+                className={`shrink-0 whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-bold transition-colors ${
+                  categoryFilter === cat
+                    ? 'bg-slate-900 text-white dark:bg-sky-500/20 dark:text-sky-300'
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex shrink-0 items-center justify-end gap-1.5">
+            <button
+              type="button"
+              onClick={() => setFallback2D((v) => !v)}
+              className="whitespace-nowrap rounded-md border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              {fallback2D ? 'العودة لعرض 3D GLB' : 'عرض تخطيطي 2D'}
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadGlb}
+              className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-emerald-600/40 bg-emerald-600/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-600/20 dark:text-emerald-300"
+              title="تنزيل ملف GLB ثنائي مضمّن"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>تحميل GLB</span>
+            </button>
+          </div>
+        </div>
+
         <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
-          {GLB_MODELS_META.map((m) => {
+          {visibleModels.map((m) => {
             const active = m.id === activeModel;
             return (
               <button
@@ -648,25 +890,6 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
               </button>
             );
           })}
-        </div>
-
-        <div className="flex shrink-0 items-center justify-end gap-1.5">
-          <button
-            type="button"
-            onClick={() => setFallback2D((v) => !v)}
-            className="whitespace-nowrap rounded-md border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            {fallback2D ? 'العودة لعرض 3D GLB' : 'عرض تخطيطي 2D'}
-          </button>
-          <button
-            type="button"
-            onClick={handleDownloadGlb}
-            className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-emerald-600/40 bg-emerald-600/10 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-600/20 dark:text-emerald-300"
-            title="تنزيل ملف GLB ثنائي مضمّن"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span>تحميل GLB</span>
-          </button>
         </div>
       </div>
 
@@ -814,11 +1037,12 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
             </button>
 
             {dockOpen && (
-              <div className="space-y-3 border-t border-slate-800 p-3 text-xs">
+              <div className="max-h-[195px] space-y-3 overflow-y-auto border-t border-slate-800 p-3 text-xs sm:max-h-[250px]">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                  {(activeModel === 'complete_pump' ||
-                    activeModel === 'exploded_pump' ||
-                    activeModel === 'mechanical_seal') && (
+                  {(activeModel !== 'impeller_types' &&
+                    activeModel !== 'cavitation_model' &&
+                    activeModel !== 'water_hammer' &&
+                    activeModel !== 'alignment_model') && (
                     <div>
                       <div className="mb-1 flex items-center justify-between">
                         <span>مستوى التفكيك (Exploded View)</span>
@@ -916,7 +1140,7 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
                             }`}
                           >
                             {isHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3 text-sky-400" />}
-                            <span>{catalogPart ? catalogPart.arName : name}</span>
+                            <span>{catalogPart ? catalogPart.arName : (NODE_AR_LABELS[name] ?? name)}</span>
                           </button>
                         );
                       })}

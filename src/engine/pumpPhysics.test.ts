@@ -139,3 +139,93 @@ test('strict MSQ grading awards 1 ONLY on exact match and 0 when wrong selected 
   assert.equal(exam.scorePct, 0);
   assert.deepEqual(exam.weakChapters, [1]);
 });
+
+test('simulatePumpOperation: multistage and barrel centrifugal deliver higher head than single-stage radial', () => {
+  const common = {
+    isRunning: true,
+    rpm: 2950,
+    suctionValvePct: 100,
+    dischargeValvePct: 78,
+    tankLevelM: 4.5,
+    fluidTempC: 35,
+    airIngressPct: 0,
+    fluidViscosityCst: 5,
+  };
+  const radial = simulatePumpOperation({ ...common, pumpType: 'centrifugal_radial' });
+  const multi = simulatePumpOperation({ ...common, pumpType: 'centrifugal_multistage' });
+  const barrel = simulatePumpOperation({ ...common, pumpType: 'centrifugal_barrel' });
+
+  assert.ok(multi.headM > radial.headM * 2.5, `Expected multistage head >> radial, got ${multi.headM} vs ${radial.headM}`);
+  assert.ok(barrel.headM > multi.headM, `Expected barrel head > multistage, got ${barrel.headM} vs ${multi.headM}`);
+});
+
+test('simulatePumpOperation: axial flow pump provides very high flow at low head with rising shutoff power', () => {
+  const radial = simulatePumpOperation({
+    isRunning: true,
+    pumpType: 'centrifugal_radial',
+    rpm: 2950,
+    suctionValvePct: 100,
+    dischargeValvePct: 78,
+    tankLevelM: 4.5,
+    fluidTempC: 35,
+    airIngressPct: 0,
+  });
+  const axialOpen = simulatePumpOperation({
+    isRunning: true,
+    pumpType: 'centrifugal_axial',
+    rpm: 1450,
+    suctionValvePct: 100,
+    dischargeValvePct: 80,
+    tankLevelM: 4.5,
+    fluidTempC: 35,
+    airIngressPct: 0,
+  });
+  const axialShutoff = simulatePumpOperation({
+    isRunning: true,
+    pumpType: 'centrifugal_axial',
+    rpm: 1450,
+    suctionValvePct: 100,
+    dischargeValvePct: 0,
+    tankLevelM: 4.5,
+    fluidTempC: 35,
+    airIngressPct: 0,
+  });
+
+  assert.ok(axialOpen.flowM3h > radial.flowM3h * 2, `Expected axial flow >> radial flow`);
+  assert.ok(axialOpen.headM < radial.headM, `Expected axial head < radial head`);
+  assert.ok(axialShutoff.shaftPowerKw > axialOpen.shaftPowerKw, `Axial shutoff power should rise above normal open flow`);
+});
+
+test('simulatePumpOperation: positive displacement pumps handle high viscosity and trigger relief valve on throttling', () => {
+  const pdNormal = simulatePumpOperation({
+    isRunning: true,
+    pumpType: 'pd_screw',
+    rpm: 1450,
+    suctionValvePct: 100,
+    dischargeValvePct: 80,
+    tankLevelM: 4.5,
+    fluidTempC: 40,
+    airIngressPct: 0,
+    fluidViscosityCst: 400,
+  });
+  assert.equal(pdNormal.reliefValveOpen, false);
+  assert.ok(pdNormal.flowM3h > 40, `Expected PD screw pump to maintain flow at 400 cSt, got ${pdNormal.flowM3h}`);
+
+  const pdThrottled = simulatePumpOperation({
+    isRunning: true,
+    pumpType: 'pd_piston_plunger',
+    rpm: 400,
+    suctionValvePct: 100,
+    dischargeValvePct: 10,
+    tankLevelM: 4.5,
+    fluidTempC: 35,
+    airIngressPct: 0,
+    fluidViscosityCst: 20,
+  });
+  assert.equal(pdThrottled.operatingZone, 'overpressure');
+  assert.equal(pdThrottled.reliefValveOpen, true);
+  assert.ok(
+    pdThrottled.statusAr.includes('صمام الأمان') || pdThrottled.causeEffectAr.includes('Relief'),
+    `Expected relief valve status/causeEffect, got: ${pdThrottled.statusAr}`,
+  );
+});

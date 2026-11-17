@@ -41,7 +41,16 @@ export type GlbModelId =
   | 'mechanical_seal'
   | 'cavitation_model'
   | 'water_hammer'
-  | 'alignment_model';
+  | 'alignment_model'
+  | 'multistage_pump'
+  | 'split_case_double_suction'
+  | 'barrel_pump'
+  | 'vertical_pump'
+  | 'axial_mixed_pump'
+  | 'reciprocating_pump'
+  | 'gear_pump'
+  | 'screw_pump'
+  | 'lobe_vane_pump';
 
 export interface PumpPartInfo {
   id: string;

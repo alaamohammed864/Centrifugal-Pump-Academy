@@ -10,6 +10,15 @@ import type { GlbModelId } from '../types/academy';
 const MODEL_IDS: GlbModelId[] = [
   'complete_pump',
   'exploded_pump',
+  'multistage_pump',
+  'split_case_double_suction',
+  'barrel_pump',
+  'vertical_pump',
+  'axial_mixed_pump',
+  'reciprocating_pump',
+  'gear_pump',
+  'screw_pump',
+  'lobe_vane_pump',
   'impeller_types',
   'bearings_loads',
   'mechanical_seal',
@@ -18,7 +27,7 @@ const MODEL_IDS: GlbModelId[] = [
   'alignment_model',
 ];
 
-test('buildGlbBuffer creates valid glTF 2.0 binary headers and JSON/BIN chunks for all 8 models', () => {
+test('buildGlbBuffer creates valid glTF 2.0 binary headers and JSON/BIN chunks for all 17 models', () => {
   for (const id of MODEL_IDS) {
     const bytes = buildGlbBuffer(id);
     assert.ok(bytes.byteLength > 200, `Model ${id} too small: ${bytes.byteLength}`);
@@ -48,9 +57,9 @@ test('buildGlbBuffer creates valid glTF 2.0 binary headers and JSON/BIN chunks f
   }
 });
 
-test('generateAllGlbBase64Map roundtrips Base64 back to identical GLB bytes', () => {
+test('generateAllGlbBase64Map roundtrips Base64 back to identical GLB bytes for all 17 models', () => {
   const map = generateAllGlbBase64Map();
-  assert.equal(Object.keys(map).length, 8);
+  assert.equal(Object.keys(map).length, 17);
   for (const id of MODEL_IDS) {
     const b64 = map[id];
     assert.ok(b64.length > 100);

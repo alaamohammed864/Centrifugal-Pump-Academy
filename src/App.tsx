@@ -158,31 +158,30 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       {/* Top 3-Zone Navigation Bar (Single-Row Desktop, Responsive Scrollable on Mobile) */}
       <header className="no-print sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2.5 sm:px-5">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-2 px-3 py-2 sm:px-4">
           {/* Zone 1: Brand Title */}
           <button
             type="button"
             onClick={() => handleNavigate('home')}
-            className="flex min-w-0 items-center gap-2 text-right"
+            className="flex min-w-0 shrink-0 items-center gap-2 text-right"
           >
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white">
               <Box className="h-4 w-4" />
             </span>
             <div className="min-w-0 leading-tight">
-              <div className="flex flex-wrap items-baseline gap-x-1.5">
-                <span className="text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
+              <div className="flex flex-col">
+                <span className="whitespace-nowrap text-xs font-bold text-slate-900 dark:text-white sm:text-[13px]">
                   أكاديمية مضخات الطرد المركزي
                 </span>
-                <span className="hidden text-slate-400 sm:inline">|</span>
-                <span className="font-en text-[10px] font-semibold text-sky-600 dark:text-sky-400 sm:text-xs">
-                  Centrifugal Pump Academy
+                <span className="font-en whitespace-nowrap text-[10px] font-semibold text-sky-600 dark:text-sky-400">
+                  | Centrifugal Pump Academy
                 </span>
               </div>
             </div>
           </button>
 
           {/* Zone 2: Horizontal Navigation Tabs (Single line labels) */}
-          <nav aria-label="التنقل الرئيسي" className="hidden items-center gap-1 overflow-x-auto lg:flex">
+          <nav aria-label="التنقل الرئيسي" className="hidden min-w-0 items-center gap-0.5 overflow-x-auto lg:flex xl:gap-1">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const active = activeTab === item.id;
@@ -191,7 +190,7 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
                   key={item.id}
                   type="button"
                   onClick={() => handleNavigate(item.id)}
-                  className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-2 py-1.5 text-[11px] font-semibold transition-colors xl:px-2.5 xl:text-xs ${
                     active
                       ? 'bg-sky-600 text-white'
                       : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
@@ -269,7 +268,7 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
             onJumpToLesson={(id) => handleNavigate('lessons', id)}
           />
         )}
-        {activeTab === 'simulator' && <SimulatorView />}
+        {activeTab === 'simulator' && <SimulatorView onOpen3DModel={handleOpen3DModel} />}
         {activeTab === 'curves' && <CurvesView />}
         {activeTab === 'troubleshooting' && <TroubleshootingView />}
         {activeTab === 'exams' && (
