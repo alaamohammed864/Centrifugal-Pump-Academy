@@ -33,14 +33,16 @@ interface DashboardHomeProps {
   progress: UserProgress;
   onNavigate: (tab: WorkspaceTab, lessonId?: number) => void;
   isStandaloneHtml?: boolean;
+  initialSearchQuery?: string;
 }
 
 export const DashboardHome: React.FC<DashboardHomeProps> = ({
   progress,
   onNavigate,
   isStandaloneHtml = false,
+  initialSearchQuery = '',
 }) => {
-  const [globalQuery, setGlobalQuery] = useState('');
+  const [globalQuery, setGlobalQuery] = useState(initialSearchQuery);
 
   const completedPct = Math.round((progress.completedLessons.length / LESSONS.length) * 100);
   const pmPct = Math.round((progress.completedPmTasks.length / MAINTENANCE_TASKS.length) * 100);
@@ -129,11 +131,19 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           </div>
 
           <div className="w-full shrink-0 overflow-hidden rounded-xl border border-sky-500/35 bg-slate-950 shadow-md lg:w-[340px]">
-            <img
-              src="/assets/aistudio/___________________________________________________________a200d03d.png"
-              alt="الشعار والهوية البصرية لأكاديمية مضخات الطرد المركزي"
-              className="aspect-video w-full object-cover object-center"
-            />
+            <picture>
+              <source srcSet="/assets/pump-academy-logo.webp" type="image/webp" />
+              <img
+                src="/assets/aistudio/___________________________________________________________a200d03d.png"
+                alt="الشعار والهوية البصرية لأكاديمية مضخات الطرد المركزي — المختبر ثلاثي الأبعاد ومنحنيات الأداء ومحاكي التشغيل"
+                width={1672}
+                height={941}
+                fetchPriority="high"
+                loading="eager"
+                decoding="async"
+                className="aspect-video w-full object-cover object-center"
+              />
+            </picture>
           </div>
         </div>
 
@@ -195,33 +205,42 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
       </div>
 
       {/* Progress Telemetry Strip */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
-          <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">إنجاز المنهج الدراسي</div>
-          <div className="font-mono-num mt-1 text-2xl font-bold text-sky-600 dark:text-sky-400">{completedPct}%</div>
-          <div className="text-[11px] text-slate-500">{progress.completedLessons.length} من 27 درساً</div>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
-          <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">متوسط الاختبارات</div>
-          <div className="font-mono-num mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-            {avgScore !== null ? `${avgScore}%` : '—'}
+      <section aria-labelledby="telemetry-heading">
+        <h2 id="telemetry-heading" className="sr-only">
+          مؤشرات التقدم الدراسي والكفاءة الهندسية
+        </h2>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">إنجاز المنهج الدراسي</div>
+            <div className="font-mono-num mt-1 text-2xl font-bold text-sky-600 dark:text-sky-400">{completedPct}%</div>
+            <div className="text-[11px] text-slate-500">{progress.completedLessons.length} من 27 درساً</div>
           </div>
-          <div className="text-[11px] text-slate-500">{progress.examHistory.length} اختباراً منجزاً</div>
+          <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">متوسط الاختبارات</div>
+            <div className="font-mono-num mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {avgScore !== null ? `${avgScore}%` : '—'}
+            </div>
+            <div className="text-[11px] text-slate-500">{progress.examHistory.length} اختباراً منجزاً</div>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">الصيانة الوقائية</div>
+            <div className="font-mono-num mt-1 text-2xl font-bold text-amber-600 dark:text-amber-400">{pmPct}%</div>
+            <div className="text-[11px] text-slate-500">{progress.completedPmTasks.length} من {MAINTENANCE_TASKS.length} مهمة</div>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">تصنيف الكفاءة الحالي</div>
+            <div className="mt-1 text-sm font-bold text-slate-900 dark:text-white">{engineerTier}</div>
+            <div className="text-[11px] text-slate-500">{progress.favorites.length} عناصر في المفضلة</div>
+          </div>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
-          <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">الصيانة الوقائية</div>
-          <div className="font-mono-num mt-1 text-2xl font-bold text-amber-600 dark:text-amber-400">{pmPct}%</div>
-          <div className="text-[11px] text-slate-500">{progress.completedPmTasks.length} من {MAINTENANCE_TASKS.length} مهمة</div>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
-          <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">تصنيف الكفاءة الحالي</div>
-          <div className="mt-1 text-sm font-bold text-slate-900 dark:text-white">{engineerTier}</div>
-          <div className="text-[11px] text-slate-500">{progress.favorites.length} عناصر في المفضلة</div>
-        </div>
-      </div>
+      </section>
 
       {/* 7 Core Platform Workspaces Grid */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section aria-labelledby="workspaces-heading">
+        <h2 id="workspaces-heading" className="mb-2.5 text-sm font-bold text-slate-800 dark:text-slate-200">
+          الأقسام والمختبرات التفاعلية
+        </h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {[
           {
             tab: 'lessons' as const,
@@ -282,7 +301,8 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             </button>
           );
         })}
-      </div>
+        </div>
+      </section>
 
       {/* Bottom Row: PM & Tools Shortcut + Weak Chapters */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

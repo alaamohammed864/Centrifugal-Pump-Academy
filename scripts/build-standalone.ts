@@ -44,8 +44,22 @@ async function main() {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>أكاديمية مضخات الطرد المركزي | Centrifugal Pump Academy</title>
     <meta name="author" content="ENG ALAA MOHAMMED" />
-    <meta name="description" content="منصة تعليمية هندسية تفاعلية متكاملة لمضخات الطرد المركزي – دراسة شركة نفط البصرة" />
-    <meta property="og:image" content="/assets/aistudio/___________________________________________________________a200d03d.png" />
+    <meta name="description" content="منصة هندسية تفاعلية لدراسة مضخات الطرد المركزي (مرجع شركة نفط البصرة): 27 درساً، 17 نموذج GLB ثلاثي الأبعاد، محاكي تشغيل، منحنيات H-Q، و162 سؤالاً." />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="canonical" href="https://ais-pre-k7mnlqvcsqc3hakxwv5y5q-711537037381.europe-west2.run.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ar_IQ" />
+    <meta property="og:site_name" content="أكاديمية مضخات الطرد المركزي | Centrifugal Pump Academy" />
+    <meta property="og:title" content="أكاديمية مضخات الطرد المركزي | Centrifugal Pump Academy" />
+    <meta property="og:description" content="منصة هندسية تفاعلية لدراسة مضخات الطرد المركزي: 27 درساً، 17 نموذج 3D GLB، محاكي تشغيل، و162 سؤالاً." />
+    <meta property="og:url" content="https://ais-pre-k7mnlqvcsqc3hakxwv5y5q-711537037381.europe-west2.run.app/" />
+    <meta property="og:image" content="https://ais-pre-k7mnlqvcsqc3hakxwv5y5q-711537037381.europe-west2.run.app/assets/og-pump-academy-1200x630.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="أكاديمية مضخات الطرد المركزي | Centrifugal Pump Academy" />
+    <meta name="twitter:description" content="منصة هندسية تفاعلية لدراسة مضخات الطرد المركزي: 27 درساً، 17 نموذج 3D GLB، ومحاكاة تشغيلية." />
+    <meta name="twitter:image" content="https://ais-pre-k7mnlqvcsqc3hakxwv5y5q-711537037381.europe-west2.run.app/assets/og-pump-academy-1200x630.jpg" />
     <link rel="icon" type="image/png" href="/assets/aistudio/___________________________________________________________a200d03d.png" />
     <link rel="apple-touch-icon" href="/assets/aistudio/___________________________________________________________a200d03d.png" />
     <meta name="theme-color" content="#0284c7" />

@@ -48,6 +48,14 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({ progress, onTo
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900">
+        <h1 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
+          جداول وبرامج الصيانة الوقائية للمضخات (PM Checklists)
+        </h1>
+        <span className="font-en text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+          Preventive Maintenance
+        </span>
+      </div>
       <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-900 dark:text-amber-200">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
         <div>
@@ -139,7 +147,7 @@ export const MaintenanceView: React.FC<MaintenanceViewProps> = ({ progress, onTo
                       </span>
                       <span className="text-slate-500">{t.sourceRef}</span>
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t.task}</h3>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white">{t.task}</h2>
                   </div>
                 </div>
               </div>

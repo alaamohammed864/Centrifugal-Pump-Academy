@@ -24,7 +24,15 @@ import { ExamCenterView } from './components/ExamCenterView';
 import { MaintenanceView } from './components/MaintenanceView';
 import { ToolsView } from './components/ToolsView';
 import { SplashScreen } from './components/SplashScreen';
+import { NotFoundView } from './components/NotFoundView';
+import { LESSONS } from './data/lessons';
 import { shouldSkipSplash } from './engine/splashUtils';
+import {
+  applySeoToDocument,
+  buildCanonicalPath,
+  buildSeoMetadata,
+  resolveRouteFromLocation,
+} from './engine/seoManager';
 
 const STORAGE_KEY = 'centrifugal_pump_academy_v1';
 
@@ -66,22 +74,22 @@ export interface AppProps {
 }
 
 export default function App({ isStandaloneHtml = false }: AppProps) {
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>(() => {
-    if (typeof window !== 'undefined') {
-      const sp = new URLSearchParams(window.location.search);
-      const t = sp.get('tab') as WorkspaceTab | null;
-      if (t && NAV_ITEMS.some((i) => i.id === t)) return t;
-      if (sp.get('autostart') === '1') return 'lab3d';
-    }
-    return 'home';
-  });
+  const initialRoute =
+    typeof window !== 'undefined'
+      ? resolveRouteFromLocation(window.location.pathname, window.location.search)
+      : { tab: 'home' as WorkspaceTab, isNotFound: false };
 
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>(initialRoute.tab);
+  const [isNotFound, setIsNotFound] = useState<boolean>(initialRoute.isNotFound);
+  const [invalidPath, setInvalidPath] = useState<string | undefined>(initialRoute.invalidPath);
   const [darkMode, setDarkMode] = useState<boolean>(true);
   const [showSplash, setShowSplash] = useState<boolean>(() =>
-    typeof window !== 'undefined' ? !shouldSkipSplash(window.location.search) : true
+    typeof window !== 'undefined' ? !initialRoute.isNotFound && !shouldSkipSplash(window.location.search) : true
   );
   const [progress, setProgress] = useState<UserProgress>(loadProgress);
-  const [selectedLessonId, setSelectedLessonId] = useState<number>(() => loadProgress().lastLessonId || 1);
+  const [selectedLessonId, setSelectedLessonId] = useState<number>(
+    () => initialRoute.lessonId || loadProgress().lastLessonId || 1
+  );
   const [selected3DModel, setSelected3DModel] = useState<GlbModelId>('complete_pump');
   const [selectedSimulatorType, setSelectedSimulatorType] = useState<SimulatorPumpType>('centrifugal_radial');
 
@@ -99,30 +107,78 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
     else root.classList.remove('dark');
   }, [darkMode]);
 
+  useEffect(() => {
+    const activeLesson =
+      activeTab === 'lessons' ? LESSONS.find((l) => l.id === selectedLessonId) : undefined;
+    const seoMeta = buildSeoMetadata({
+      tab: activeTab,
+      lesson: activeLesson,
+      origin: typeof window !== 'undefined' ? window.location.origin : undefined,
+      isNotFound,
+    });
+    applySeoToDocument(seoMeta);
+  }, [activeTab, selectedLessonId, isNotFound]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const next = resolveRouteFromLocation(window.location.pathname, window.location.search);
+      setActiveTab(next.tab);
+      setIsNotFound(next.isNotFound);
+      setInvalidPath(next.invalidPath);
+      if (next.lessonId) setSelectedLessonId(next.lessonId);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const syncHistoryUrl = (tab: WorkspaceTab, lessonId?: number) => {
+    if (isStandaloneHtml || typeof window === 'undefined') return;
+    try {
+      const nextPath = buildCanonicalPath(tab, lessonId);
+      if (window.location.pathname + window.location.search !== nextPath) {
+        window.history.pushState({ tab, lessonId }, '', nextPath);
+      }
+    } catch {
+      // ignore sandbox history errors on file://
+    }
+  };
+
   const handleNavigate = (tab: WorkspaceTab, lessonId?: number) => {
+    setIsNotFound(false);
+    setInvalidPath(undefined);
     setActiveTab(tab);
+    const resolvedLessonId = lessonId ?? (tab === 'lessons' ? selectedLessonId : undefined);
     if (lessonId) {
       setSelectedLessonId(lessonId);
       setProgress((p) => ({ ...p, lastLessonId: lessonId }));
     }
+    syncHistoryUrl(tab, resolvedLessonId);
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
   const handleOpen3DModel = (modelId: GlbModelId) => {
+    setIsNotFound(false);
     setSelected3DModel(modelId);
     setActiveTab('lab3d');
+    syncHistoryUrl('lab3d');
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
   const handleOpenSimulator = (pumpType: SimulatorPumpType) => {
+    setIsNotFound(false);
     setSelectedSimulatorType(pumpType);
     setActiveTab('simulator');
+    syncHistoryUrl('simulator');
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
   const handleSelectLesson = (id: number) => {
+    setIsNotFound(false);
     setSelectedLessonId(id);
     setProgress((p) => ({ ...p, lastLessonId: id }));
+    if (activeTab === 'lessons') {
+      syncHistoryUrl('lessons', id);
+    }
   };
 
   const handleToggleComplete = (lessonId: number) => {
@@ -180,11 +236,18 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
             className="flex min-w-0 shrink-0 items-center gap-2 text-right"
           >
             <span className="flex h-9 w-14 shrink-0 overflow-hidden rounded-lg border border-sky-500/40 bg-slate-950 shadow-sm">
-              <img
-                src="/assets/aistudio/___________________________________________________________a200d03d.png"
-                alt="شعار أكاديمية مضخات الطرد المركزي"
-                className="h-full w-full object-cover object-center"
-              />
+              <picture className="block h-full w-full">
+                <source srcSet="/assets/pump-academy-logo.webp" type="image/webp" />
+                <img
+                  src="/assets/aistudio/___________________________________________________________a200d03d.png"
+                  alt="شعار أكاديمية مضخات الطرد المركزي"
+                  width={1672}
+                  height={941}
+                  loading="eager"
+                  decoding="async"
+                  className="h-full w-full object-cover object-center"
+                />
+              </picture>
             </span>
             <div className="min-w-0 leading-tight">
               <div className="flex flex-col">
@@ -266,51 +329,83 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
 
       {/* Main Content Container */}
       <main className="mx-auto max-w-7xl px-3 py-4 sm:px-5 sm:py-5">
-        {activeTab === 'home' && (
-          <DashboardHome progress={progress} onNavigate={handleNavigate} isStandaloneHtml={isStandaloneHtml} />
+        {isNotFound ? (
+          <NotFoundView invalidPath={invalidPath} onNavigate={handleNavigate} />
+        ) : (
+          <>
+            {activeTab === 'home' && (
+              <DashboardHome
+                progress={progress}
+                onNavigate={handleNavigate}
+                isStandaloneHtml={isStandaloneHtml}
+                initialSearchQuery={initialRoute.searchQuery}
+              />
+            )}
+            {activeTab === 'lessons' && (
+              <LessonsView
+                selectedLessonId={selectedLessonId}
+                onSelectLesson={handleSelectLesson}
+                progress={progress}
+                onToggleComplete={handleToggleComplete}
+                onToggleFavorite={handleToggleFavorite}
+                onSaveNote={handleSaveNote}
+                onOpen3DModel={handleOpen3DModel}
+              />
+            )}
+            {activeTab === 'lab3d' && (
+              <Pump3DViewport
+                initialModelId={selected3DModel}
+                onJumpToLesson={(id) => handleNavigate('lessons', id)}
+                onOpenInSimulator={handleOpenSimulator}
+              />
+            )}
+            {activeTab === 'simulator' && (
+              <SimulatorView initialPumpType={selectedSimulatorType} onOpen3DModel={handleOpen3DModel} />
+            )}
+            {activeTab === 'curves' && <CurvesView />}
+            {activeTab === 'troubleshooting' && <TroubleshootingView />}
+            {activeTab === 'exams' && (
+              <ExamCenterView
+                progress={progress}
+                onSaveExamResult={handleSaveExamResult}
+                onToggleFavorite={handleToggleFavorite}
+                onToggleStudyHideAnswers={() =>
+                  setProgress((p) => ({ ...p, studyModeHideAnswers: !p.studyModeHideAnswers }))
+                }
+                onJumpToLesson={(id) => handleNavigate('lessons', id)}
+              />
+            )}
+            {activeTab === 'maintenance' && (
+              <MaintenanceView progress={progress} onTogglePmTask={handleTogglePmTask} />
+            )}
+            {activeTab === 'tools' && <ToolsView />}
+          </>
         )}
-        {activeTab === 'lessons' && (
-          <LessonsView
-            selectedLessonId={selectedLessonId}
-            onSelectLesson={handleSelectLesson}
-            progress={progress}
-            onToggleComplete={handleToggleComplete}
-            onToggleFavorite={handleToggleFavorite}
-            onSaveNote={handleSaveNote}
-            onOpen3DModel={handleOpen3DModel}
-          />
-        )}
-        {activeTab === 'lab3d' && (
-          <Pump3DViewport
-            initialModelId={selected3DModel}
-            onJumpToLesson={(id) => handleNavigate('lessons', id)}
-            onOpenInSimulator={handleOpenSimulator}
-          />
-        )}
-        {activeTab === 'simulator' && (
-          <SimulatorView initialPumpType={selectedSimulatorType} onOpen3DModel={handleOpen3DModel} />
-        )}
-        {activeTab === 'curves' && <CurvesView />}
-        {activeTab === 'troubleshooting' && <TroubleshootingView />}
-        {activeTab === 'exams' && (
-          <ExamCenterView
-            progress={progress}
-            onSaveExamResult={handleSaveExamResult}
-            onToggleFavorite={handleToggleFavorite}
-            onToggleStudyHideAnswers={() =>
-              setProgress((p) => ({ ...p, studyModeHideAnswers: !p.studyModeHideAnswers }))
-            }
-            onJumpToLesson={(id) => handleNavigate('lessons', id)}
-          />
-        )}
-        {activeTab === 'maintenance' && (
-          <MaintenanceView progress={progress} onTogglePmTask={handleTogglePmTask} />
-        )}
-        {activeTab === 'tools' && <ToolsView />}
       </main>
 
-      {/* Footer */}
-      <footer className="no-print mt-6 border-t border-slate-200 bg-white px-3 py-3.5 text-center text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+      {/* Footer with Internal Crawl Links */}
+      <footer className="no-print mt-6 border-t border-slate-200 bg-white px-3 py-4 text-center text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+        <nav
+          aria-label="روابط أقسام الأكاديمية"
+          className="mx-auto mb-2.5 flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1.5"
+        >
+          {NAV_ITEMS.map((item) => {
+            const href = buildCanonicalPath(item.id);
+            return (
+              <a
+                key={item.id}
+                href={href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigate(item.id);
+                }}
+                className="font-semibold text-slate-600 underline-offset-4 hover:text-sky-600 hover:underline dark:text-slate-400 dark:hover:text-sky-400"
+              >
+                {item.label}
+              </a>
+            );
+          })}
+        </nav>
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-2 gap-y-1">
           <span>
             تطوير وإعداد: <strong dir="ltr" className="font-en font-bold text-sky-600 dark:text-sky-400">ENG ALAA MOHAMMED</strong>

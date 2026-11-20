@@ -78,6 +78,14 @@ export const ToolsView: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900">
+        <h1 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
+          الحاسبات الهندسية، مقارنة التصاميم والقاموس الفني للمضخات
+        </h1>
+        <span className="font-en text-[11px] font-semibold text-sky-600 dark:text-sky-400">
+          Engineering Calculators & Glossary
+        </span>
+      </div>
       {/* Sub Tabs */}
       <div className="flex flex-nowrap gap-1.5 overflow-x-auto rounded-xl border border-slate-200 bg-white p-3 sm:flex-wrap sm:overflow-visible dark:border-slate-800 dark:bg-slate-900">
         {(
@@ -117,9 +125,9 @@ export const ToolsView: React.FC = () => {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {/* Hydrostatic & Pump Powers */}
             <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                 1. حاسبة الضغط الإستاتيكي والقدرة الهيدروليكية وقدرة العمود
-              </h3>
+              </h2>
               <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
                 <label className="block">
                   <span className="mb-1 block text-slate-600 dark:text-slate-400">الكثافة ρ (kg/m³)</span>
@@ -203,9 +211,9 @@ export const ToolsView: React.FC = () => {
             {/* Affinity Laws + Unit Converter */}
             <div className="space-y-4">
               <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                   2. قوانين التماثل عند تغير السرعة (Affinity Laws: N, N², N³)
-                </h3>
+                </h2>
                 <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
                   <label>
                     <span className="mb-1 block text-slate-500">N₁ (RPM)</span>
@@ -247,7 +255,7 @@ export const ToolsView: React.FC = () => {
               </div>
 
               <div className="space-y-2.5 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">3. محول الوحدات الهندسية للمضخات</h3>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">3. محول الوحدات الهندسية للمضخات</h2>
                 <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
                   <select
                     value={uCat}
@@ -414,7 +422,7 @@ export const ToolsView: React.FC = () => {
               className="space-y-2.5 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
             >
               <div className="text-xs font-semibold text-sky-600 dark:text-sky-400">{cs.facilityType}</div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">{cs.title}</h3>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">{cs.title}</h2>
               <div className="grid grid-cols-1 gap-3 text-xs md:grid-cols-2">
                 <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
                   <strong>المشكلة: </strong>

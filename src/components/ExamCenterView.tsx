@@ -132,9 +132,9 @@ export const ExamCenterView: React.FC<ExamCenterViewProps> = ({
       <div className="rounded-xl border border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+            <h1 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
               مركز اختبارات الكفاءات الهندسية (بنك من {QUESTIONS.length} سؤال اختيار متعدد MSQ)
-            </h2>
+            </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               التصحيح الصارم: تُحسب الدرجة الكاملة للسؤال فقط عند تحديد جميع الإجابات الصحيحة دون اختيار أي خيار خاطئ.
             </p>

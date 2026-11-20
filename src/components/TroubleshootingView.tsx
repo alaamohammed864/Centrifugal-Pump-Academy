@@ -42,6 +42,14 @@ export const TroubleshootingView: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900">
+        <h1 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
+          تشخيص أعطال مضخات الطرد المركزي ومختبر «أنت مهندس الصيانة»
+        </h1>
+        <span className="font-en text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+          Troubleshooting & Diagnostics
+        </span>
+      </div>
       {/* Mode Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -117,7 +125,7 @@ export const TroubleshootingView: React.FC = () => {
           <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 lg:col-span-8">
             <div className="border-b border-slate-200 pb-3 dark:border-slate-800">
               <div className="text-xs font-semibold text-sky-600 dark:text-sky-400">{activeGuide.sourcePages}</div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">{activeGuide.title}</h3>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">{activeGuide.title}</h2>
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{activeGuide.description}</p>
             </div>
 
@@ -148,9 +156,9 @@ export const TroubleshootingView: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 الأسباب الهندسية المحتملة وخطوات التحقق والمعالجة:
-              </h4>
+              </h3>
               {activeGuide.causes.map((c, idx) => (
                 <div
                   key={idx}
@@ -209,7 +217,7 @@ export const TroubleshootingView: React.FC = () => {
                 <div className="font-mono-num text-xs font-bold text-amber-600 dark:text-amber-400">
                   {mission.unitTag}
                 </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">{mission.title}</h3>
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">{mission.title}</h2>
                 <p className="mt-1.5 text-xs leading-relaxed text-slate-700 dark:text-slate-300">{mission.scenario}</p>
               </div>
 

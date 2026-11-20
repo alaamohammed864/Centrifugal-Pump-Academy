@@ -52,6 +52,14 @@ export const CurvesView: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900">
+        <h1 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
+          مختبر منحنيات الأداء (H-Q ونقطة BEP ومنحنى النظام)
+        </h1>
+        <span className="font-en text-[11px] font-semibold text-cyan-600 dark:text-cyan-400">
+          Pump Performance Curves
+        </span>
+      </div>
       <div className="flex items-start gap-2.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3.5 py-2.5 text-xs text-sky-900 dark:text-sky-200">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-500" />
         <div>

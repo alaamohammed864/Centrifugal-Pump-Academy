@@ -72,21 +72,36 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
       }`}
     >
       {/* Mobile-only Ambient Blurred Desert Horizon Backdrop so full truck stays uncropped in portrait */}
-      <img
-        src={SPLASH_ASSET_PATH}
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-45 blur-2xl sm:hidden"
-      />
+      <picture className="pointer-events-none absolute inset-0 sm:hidden">
+        <source srcSet="/assets/basra-marsh-truck.webp" type="image/webp" />
+        <img
+          src={SPLASH_ASSET_PATH}
+          alt=""
+          aria-hidden="true"
+          width={1672}
+          height={941}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full scale-110 object-cover opacity-45 blur-2xl"
+        />
+      </picture>
 
       {/* Hero Vehicle Layer: Uncropped cinematic showcase on mobile portrait, full-bleed 16:9 on tablet/desktop */}
       <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
         <div className="relative flex h-auto w-full items-center justify-center overflow-hidden sm:h-full">
-          <img
-            src={SPLASH_ASSET_PATH}
-            alt="شاحنة لاندكروزر في أهوار البصرة"
-            className="animate-splash-truck aspect-video w-full object-cover object-center contrast-[1.09] saturate-[1.12] brightness-[1.02] will-change-transform sm:aspect-auto sm:h-full sm:w-full"
-          />
+          <picture className="block w-full sm:h-full">
+            <source srcSet="/assets/basra-marsh-truck.webp" type="image/webp" />
+            <img
+              src={SPLASH_ASSET_PATH}
+              alt="شاحنة لاندكروزر في أهوار البصرة"
+              width={1672}
+              height={941}
+              fetchPriority="high"
+              loading="eager"
+              decoding="sync"
+              className="animate-splash-truck aspect-video w-full object-cover object-center contrast-[1.09] saturate-[1.12] brightness-[1.02] will-change-transform sm:aspect-auto sm:h-full sm:w-full"
+            />
+          </picture>
 
           {/* Soft Top & Bottom Edge Blending on Portrait Mobile */}
           <div
@@ -136,9 +151,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         <div className="rounded-2xl border border-white/25 bg-slate-950/20 px-4 py-2.5 shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md sm:px-5 sm:py-3">
           <div className="mb-2 flex items-end justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="truncate text-sm font-extrabold text-white drop-shadow sm:text-base">
+              <p className="truncate text-sm font-extrabold text-white drop-shadow sm:text-base">
                 أكاديمية مضخات الطرد المركزي
-              </h1>
+              </p>
               <p className="font-en truncate text-[11px] font-semibold text-sky-300/95">
                 Centrifugal Pump Academy
               </p>

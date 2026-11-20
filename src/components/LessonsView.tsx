@@ -250,7 +250,7 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
                   مرجع الدراسة: {lesson.sourcePages}
                 </span>
               </div>
-              <h2 className="text-lg font-bold text-slate-900 sm:text-xl dark:text-white">{lesson.title}</h2>
+              <h1 className="text-lg font-bold text-slate-900 sm:text-xl dark:text-white">{lesson.title}</h1>
               <div className="font-en text-xs font-medium text-sky-600 dark:text-sky-400">{lesson.englishTitle}</div>
             </div>
 
@@ -295,7 +295,7 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
           {/* Simple Definition */}
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/70">
             <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">التعريف الهندسي المبسط</h3>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">التعريف الهندسي المبسط</h2>
               <span className={`rounded border px-2 py-0.5 text-[11px] font-semibold ${TAG_LABELS[lesson.simpleDef.tag].cls}`}>
                 {TAG_LABELS[lesson.simpleDef.tag].label}
               </span>
@@ -305,7 +305,7 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
 
           {/* Deep Engineering Paragraphs with Explicit Attribution Tags */}
           <section className="space-y-2.5">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">الشرح الهندسي المتخصص</h3>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">الشرح الهندسي المتخصص</h2>
             {lesson.engineeringExp.map((block, idx) => (
               <div
                 key={idx}
@@ -327,13 +327,13 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
           {/* Oil Field Importance & How It Works */}
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <section className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-950/50">
-              <h3 className="mb-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+              <h2 className="mb-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
                 الأهمية في المنشآت النفطية
-              </h3>
+              </h2>
               <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">{lesson.oilFieldImportance}</p>
             </section>
             <section className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-950/50">
-              <h3 className="mb-1.5 text-xs font-bold text-sky-600 dark:text-sky-400">آلية العمل الهندسية</h3>
+              <h2 className="mb-1.5 text-xs font-bold text-sky-600 dark:text-sky-400">آلية العمل الهندسية</h2>
               <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">{lesson.howItWorks}</p>
             </section>
           </div>
@@ -341,7 +341,7 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
           {/* Operational Examples, Common Errors, Field Symptoms */}
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <section className="rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-3">
-              <h4 className="mb-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">أمثلة تشغيلية واقعية</h4>
+              <h3 className="mb-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">أمثلة تشغيلية واقعية</h3>
               <ul className="list-disc space-y-1 pr-4 text-xs text-slate-700 dark:text-slate-300">
                 {lesson.operationalExamples.map((ex, i) => (
                   <li key={i}>{ex}</li>
@@ -349,7 +349,7 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
               </ul>
             </section>
             <section className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-3">
-              <h4 className="mb-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">الأخطاء الشائعة</h4>
+              <h3 className="mb-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">الأخطاء الشائعة</h3>
               <ul className="list-disc space-y-1 pr-4 text-xs text-slate-700 dark:text-slate-300">
                 {lesson.commonErrors.map((er, i) => (
                   <li key={i}>{er}</li>
@@ -357,7 +357,7 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
               </ul>
             </section>
             <section className="rounded-lg border border-rose-500/25 bg-rose-500/5 p-3">
-              <h4 className="mb-1.5 text-xs font-bold text-rose-700 dark:text-rose-300">علامات الخلل الميدانية</h4>
+              <h3 className="mb-1.5 text-xs font-bold text-rose-700 dark:text-rose-300">علامات الخلل الميدانية</h3>
               <ul className="list-disc space-y-1 pr-4 text-xs text-slate-700 dark:text-slate-300">
                 {lesson.fieldSymptoms.map((sy, i) => (
                   <li key={i}>{sy}</li>
@@ -368,7 +368,7 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
 
           {/* English Terms */}
           <section>
-            <h4 className="mb-2 text-xs font-bold text-slate-700 dark:text-slate-300">المصطلحات الإنجليزية المقابلة:</h4>
+            <h2 className="mb-2 text-xs font-bold text-slate-700 dark:text-slate-300">المصطلحات الإنجليزية المقابلة:</h2>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
               {lesson.englishTerms.map((t, i) => (
                 <div
@@ -384,7 +384,7 @@ export const LessonsView: React.FC<LessonsViewProps> = ({
 
           {/* Mini Review Questions */}
           <section className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">أسئلة مراجعة سريعة للدرس (اختيار متعدد)</h3>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">أسئلة مراجعة سريعة للدرس (اختيار متعدد)</h2>
             {lesson.reviewQuestions.map((rq, qIdx) => {
               const selected = miniQuizChoices[qIdx] ?? [];
               const checked = Boolean(miniQuizChecked[qIdx]);

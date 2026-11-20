@@ -100,6 +100,14 @@ export const SimulatorView: React.FC<SimulatorViewProps> = ({
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900">
+        <h1 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
+          محاكي تشغيل مضخات الطرد المركزي والإزاحة الموجبة التفاعلي
+        </h1>
+        <span className="font-en text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+          Hydraulic Operation Simulator
+        </span>
+      </div>
       {/* Educational Disclaimer */}
       <div className="flex items-start gap-2.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3.5 py-2.5 text-xs text-sky-900 dark:text-sky-200">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-500" />

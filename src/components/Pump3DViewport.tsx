@@ -809,6 +809,14 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
 
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-900">
+        <h1 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
+          مختبر النماذج ثلاثية الأبعاد CAD / GLB للمضخات ({GLB_MODELS_META.length} نموذجاً حقيقياً)
+        </h1>
+        <span className="font-en text-[11px] font-semibold text-sky-600 dark:text-sky-400">
+          3D Interactive Pump CAD Lab
+        </span>
+      </div>
       {/* Category Filter + Model Selector Strip */}
       <div className="flex flex-col gap-2 rounded-lg border border-slate-300 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2 dark:border-slate-800">
