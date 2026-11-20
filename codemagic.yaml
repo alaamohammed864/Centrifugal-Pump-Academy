@@ -12,14 +12,14 @@ workflows:
       - name: Install Node dependencies
         script: |
           if [ -f package-lock.json ]; then
-            npm ci
+            npm ci --legacy-peer-deps
           else
-            npm install
+            npm install --legacy-peer-deps
           fi
       - name: Run TypeScript & unit checks
         script: |
           npm run lint
-          npx tsx --test src/engine/*.test.ts src/data/*.test.ts
+          npx --no-install tsx --test src/engine/*.test.ts src/data/*.test.ts
       - name: Build web production bundle
         script: |
           npm run build
@@ -53,14 +53,14 @@ workflows:
       - name: Install Node dependencies
         script: |
           if [ -f package-lock.json ]; then
-            npm ci
+            npm ci --legacy-peer-deps
           else
-            npm install
+            npm install --legacy-peer-deps
           fi
       - name: Run TypeScript & unit checks
         script: |
           npm run lint
-          npx tsx --test src/engine/*.test.ts src/data/*.test.ts
+          npx --no-install tsx --test src/engine/*.test.ts src/data/*.test.ts
       - name: Build web production bundle
         script: |
           npm run build
