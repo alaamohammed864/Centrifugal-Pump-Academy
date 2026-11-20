@@ -233,9 +233,9 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
           <button
             type="button"
             onClick={() => handleNavigate('home')}
-            className="flex min-w-0 shrink-0 items-center gap-2 text-right"
+            className="flex min-w-0 shrink items-center gap-2 text-right lg:shrink-0"
           >
-            <span className="flex h-9 w-14 shrink-0 overflow-hidden rounded-lg border border-sky-500/40 bg-slate-950 shadow-sm">
+            <span className="flex h-9 w-12 shrink-0 overflow-hidden rounded-lg border border-sky-500/40 bg-slate-950 shadow-sm sm:w-14">
               <picture className="block h-full w-full">
                 <source srcSet="/assets/pump-academy-logo.webp" type="image/webp" />
                 <img
@@ -250,11 +250,11 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
               </picture>
             </span>
             <div className="min-w-0 leading-tight">
-              <div className="flex flex-col">
-                <span className="whitespace-nowrap text-xs font-bold text-slate-900 dark:text-white sm:text-[13px]">
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-xs font-bold text-slate-900 dark:text-white sm:text-[13px]">
                   أكاديمية مضخات الطرد المركزي
                 </span>
-                <span className="font-en whitespace-nowrap text-[10px] font-semibold text-sky-600 dark:text-sky-400">
+                <span className="font-en truncate text-[10px] font-semibold text-sky-600 dark:text-sky-400">
                   | Centrifugal Pump Academy
                 </span>
               </div>

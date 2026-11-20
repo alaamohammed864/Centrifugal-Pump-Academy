@@ -26,6 +26,7 @@ import {
 import type { GlbModelId, PumpPartInfo } from '../types/academy';
 import type { SimulatorPumpType } from '../engine/pumpPhysics';
 import { GLB_MODELS_META, getGlbModelUrl, type GlbCategory } from '../engine/glbCatalog';
+import { computeAspectAwareFitDistance, getModelViewDirection } from '../engine/cameraFraming';
 import { PUMP_PARTS_CATALOG } from '../data/lessons';
 import { Pump2DSchematic } from './Pump2DSchematic';
 
@@ -155,6 +156,10 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
     }[];
     homeCamPos: THREE.Vector3;
     homeTarget: THREE.Vector3;
+    lastBoxSize: THREE.Vector3 | null;
+    lastBoxCenter: THREE.Vector3 | null;
+    userInteracted: boolean;
+    refitCameraToAspect: (applyToCamera?: boolean) => void;
   }>({
     operateActions: [],
     hasGlbAnimation: false,
@@ -169,6 +174,10 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
     explodeWrappers: [],
     homeCamPos: new THREE.Vector3(3.5, 2.55, 5.0),
     homeTarget: new THREE.Vector3(0, 1.05, 0),
+    lastBoxSize: null,
+    lastBoxCenter: null,
+    userInteracted: false,
+    refitCameraToAspect: () => {},
   });
 
   sceneStateRef.current.activeModel = activeModel;
@@ -400,7 +409,37 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
         rafId = requestAnimationFrame(drawFrame);
       };
 
+      const onControlStart = () => {
+        st.userInteracted = true;
+      };
+      controls.addEventListener('start', onControlStart);
       controls.addEventListener('change', st.requestRender);
+
+      st.refitCameraToAspect = (applyToCamera = false) => {
+        if (!st.lastBoxSize || !st.lastBoxCenter || !st.camera || !st.controls) return;
+        const viewDir = getModelViewDirection(st.activeModel);
+        const fit = computeAspectAwareFitDistance({
+          size: { x: st.lastBoxSize.x, y: st.lastBoxSize.y, z: st.lastBoxSize.z },
+          viewDir,
+          fovDeg: st.camera.fov,
+          aspect: st.camera.aspect || 1,
+          padding: st.camera.aspect < 1 ? 1.3 : 1.24,
+        });
+        const dirVec = new THREE.Vector3(viewDir.x, viewDir.y, viewDir.z).normalize();
+        const camPos = st.lastBoxCenter.clone().addScaledVector(dirVec, fit.distance);
+        st.homeCamPos.copy(camPos);
+        st.homeTarget.copy(st.lastBoxCenter);
+
+        const maxDim = Math.max(st.lastBoxSize.x, st.lastBoxSize.y, st.lastBoxSize.z, 1.0);
+        st.controls.minDistance = Math.max(0.35, maxDim * 0.25);
+        st.controls.maxDistance = Math.max(14, fit.distance * 4.5);
+
+        if (applyToCamera) {
+          st.camera.position.copy(camPos);
+          st.controls.target.copy(st.lastBoxCenter);
+          st.controls.update();
+        }
+      };
 
       // Raycasting on pointer tap/click (ignoring orbit drags)
       let downPos = { x: 0, y: 0 };
@@ -475,15 +514,20 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
 
       const handleResize = () => {
         if (!host || disposed) return;
-        const w = Math.max(1, host.clientWidth);
-        const h = Math.max(1, host.clientHeight);
+        const rect = host.getBoundingClientRect();
+        const w = Math.max(1, Math.round(rect.width || host.clientWidth));
+        const h = Math.max(1, Math.round(rect.height || host.clientHeight));
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+        renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2));
         renderer.setSize(w, h, false);
+        st.refitCameraToAspect(!st.userInteracted);
         st.requestRender();
       };
       const ro = new ResizeObserver(handleResize);
       ro.observe(host);
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('orientationchange', handleResize);
       handleResize();
 
       return () => {
@@ -491,6 +535,9 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
         cancelAnimationFrame(rafId);
         clearTimeout(timeoutId);
         ro.disconnect();
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('orientationchange', handleResize);
+        controls.removeEventListener('start', onControlStart);
         controls.removeEventListener('change', st.requestRender);
         renderer.domElement.removeEventListener('pointerdown', onPointerDown);
         renderer.domElement.removeEventListener('pointerup', onPointerUp);
@@ -656,31 +703,16 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
               setHasGlbAnimations(false);
             }
 
-            // Auto-frame camera cleanly via bounding box
+            // Auto-frame camera cleanly via bounding box + current viewport aspect ratio (desktop & mobile)
+            st.userInteracted = false;
             const box = new THREE.Box3().setFromObject(loadedRoot);
-            if (!box.isEmpty() && st.camera && st.controls) {
-              const center = box.getCenter(new THREE.Vector3());
-              const size = box.getSize(new THREE.Vector3());
-              const maxDim = Math.max(size.x, size.y, size.z, 1.0);
-              const fovRad = THREE.MathUtils.degToRad(st.camera.fov);
-              const fitDist = (maxDim / (2 * Math.tan(fovRad / 2))) * 1.48;
-
-              let dirVec = new THREE.Vector3(0.62, 0.36, 0.72).normalize();
-              if (activeModel === 'impeller_types') {
-                dirVec = new THREE.Vector3(0, 0.32, 0.95).normalize();
-              } else if (activeModel === 'water_hammer') {
-                dirVec = new THREE.Vector3(0.12, 0.3, 0.94).normalize();
-              }
-
-              const camPos = center.clone().addScaledVector(dirVec, fitDist);
-              st.homeCamPos.copy(camPos);
-              st.homeTarget.copy(center);
-
-              st.camera.position.copy(camPos);
-              st.controls.target.copy(center);
-              st.controls.minDistance = Math.max(0.35, maxDim * 0.28);
-              st.controls.maxDistance = Math.max(12, maxDim * 5.5);
-              st.controls.update();
+            if (!box.isEmpty()) {
+              st.lastBoxCenter = box.getCenter(new THREE.Vector3());
+              st.lastBoxSize = box.getSize(new THREE.Vector3());
+              st.refitCameraToAspect(true);
+            } else {
+              st.lastBoxCenter = null;
+              st.lastBoxSize = null;
             }
 
             setIsLoadingModel(false);
@@ -737,12 +769,14 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
 
   const handleResetView = () => {
     const st = sceneStateRef.current;
-    if (st.camera && st.controls) {
+    st.userInteracted = false;
+    st.refitCameraToAspect(true);
+    if (st.camera && st.controls && !st.lastBoxSize) {
       st.camera.position.copy(st.homeCamPos);
       st.controls.target.copy(st.homeTarget);
       st.controls.update();
-      st.requestRender();
     }
+    st.requestRender();
   };
 
   const handleReplayWaterHammer = () => {
@@ -787,14 +821,30 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
     }
   };
 
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setIsFullscreen(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, []);
+
   const handleToggleFullscreen = () => {
     if (!stageRef.current) return;
-    if (!document.fullscreenElement) {
-      stageRef.current.requestFullscreen?.().catch(() => {});
+    if (!isFullscreen) {
       setIsFullscreen(true);
+      if (typeof stageRef.current.requestFullscreen === 'function') {
+        stageRef.current.requestFullscreen().catch(() => {
+          // CSS fixed inset-0 fallback keeps fullscreen active on mobile browsers/WebViews
+        });
+      }
     } else {
-      document.exitFullscreen?.().catch(() => {});
       setIsFullscreen(false);
+      if (document.fullscreenElement && typeof document.exitFullscreen === 'function') {
+        document.exitFullscreen().catch(() => {});
+      }
     }
   };
 
@@ -808,7 +858,7 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
   }, [activeModel]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex w-full min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-900">
         <h1 className="text-sm font-bold text-slate-900 sm:text-base dark:text-white">
           مختبر النماذج ثلاثية الأبعاد CAD / GLB للمضخات ({GLB_MODELS_META.length} نموذجاً حقيقياً)
@@ -818,9 +868,9 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
         </span>
       </div>
       {/* Category Filter + Model Selector Strip */}
-      <div className="flex flex-col gap-2 rounded-lg border border-slate-300 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2 dark:border-slate-800">
-          <div className="flex flex-nowrap items-center gap-1 overflow-x-auto sm:flex-wrap sm:overflow-visible">
+      <div className="flex w-full min-w-0 flex-col gap-2 rounded-lg border border-slate-300 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex w-full min-w-0 flex-col gap-2 border-b border-slate-200 pb-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between dark:border-slate-800">
+          <div className="flex w-full min-w-0 flex-nowrap items-center gap-1 overflow-x-auto pb-1 sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0">
             {(
               [
                 ['all', `الكل (${GLB_MODELS_META.length})`],
@@ -844,7 +894,7 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
             ))}
           </div>
 
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+          <div className="flex w-full min-w-0 flex-wrap items-center justify-start gap-1.5 sm:w-auto sm:justify-end">
             {onOpenInSimulator && activeMeta.relatedSimulatorType && (
               <button
                 type="button"
@@ -885,7 +935,7 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
+        <div className="flex w-full min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
           {visibleModels.map((m) => {
             const active = m.id === activeModel;
             return (
@@ -915,8 +965,12 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
       {/* Main Stage */}
       <div
         ref={stageRef}
-        className={`relative overflow-hidden rounded-xl border border-slate-300 bg-slate-950 dark:border-slate-800 ${
-          compactMode ? 'h-[340px] sm:h-[380px]' : 'h-[390px] sm:h-[480px] md:h-[580px]'
+        className={`relative w-full min-w-0 overflow-hidden bg-slate-950 ${
+          isFullscreen
+            ? 'fixed inset-0 z-50 h-[100dvh] w-screen rounded-none border-0'
+            : `rounded-xl border border-slate-300 dark:border-slate-800 ${
+                compactMode ? 'h-[320px] sm:h-[380px]' : 'h-[min(58dvh,420px)] min-h-[300px] sm:h-[480px] md:h-[580px]'
+              }`
         }`}
       >
         {fallback2D ? (
@@ -1233,9 +1287,9 @@ export const Pump3DViewport: React.FC<Pump3DViewportProps> = ({
       </div>
 
       {/* Model Engineering Caption */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
-        <span>{activeMeta.desc}</span>
-        <span className="font-en text-[11px] text-slate-500">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+        <span className="min-w-0">{activeMeta.desc}</span>
+        <span className="font-en min-w-0 break-words text-[11px] text-slate-500">
           {hasGlbAnimations ? 'Real GLB (AnimationMixer: Operate)' : 'Real GLB Static CAD'} · Orbit / Zoom / Pan / Tap Part
         </span>
       </div>
