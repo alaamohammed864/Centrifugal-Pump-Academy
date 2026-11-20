@@ -79,8 +79,8 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
     <div className="space-y-5">
       {/* Compact Command-Center Academy Header (Not a marketing landing page) */}
       <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-2xl">
+        <div className="flex flex-col-reverse items-stretch justify-between gap-4 lg:flex-row lg:items-center">
+          <div className="min-w-0 flex-1">
             <div className="text-xs font-bold text-sky-600 dark:text-sky-400">
               منصة التدريب والمحاكاة الهندسية — مرجع دراسة شركة نفط البصرة (146 صفحة)
             </div>
@@ -97,35 +97,43 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
               <span>إعداد وتطوير المنصة:</span>
               <span dir="ltr" className="font-en font-bold tracking-wide">ENG ALAA MOHAMMED</span>
             </div>
+
+            <div className="mt-3 flex w-full flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onNavigate('lessons', lastLesson.id)}
+                className="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-sky-600 px-4 py-2 text-xs font-bold text-white hover:bg-sky-500 sm:flex-initial"
+              >
+                <Play className="h-3.5 w-3.5" />
+                <span>متابعة الدرس {lastLesson.id}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('lab3d')}
+                className="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 sm:flex-initial"
+              >
+                <Box className="h-3.5 w-3.5 text-sky-500" />
+                <span>مختبر 3D GLB</span>
+              </button>
+              {!isStandaloneHtml && (
+                <a
+                  href="/Centrifugal_Pump_Academy.html"
+                  download="Centrifugal_Pump_Academy.html"
+                  className="inline-flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-emerald-600/50 bg-emerald-600/10 px-3.5 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-600/20 dark:text-emerald-300 sm:w-auto"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>تحميل ملف HTML واحد المستقل</span>
+                </a>
+              )}
+            </div>
           </div>
 
-          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-            <button
-              type="button"
-              onClick={() => onNavigate('lessons', lastLesson.id)}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-sky-600 px-4 py-2 text-xs font-bold text-white hover:bg-sky-500 sm:flex-initial"
-            >
-              <Play className="h-3.5 w-3.5" />
-              <span>متابعة الدرس {lastLesson.id}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onNavigate('lab3d')}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 sm:flex-initial"
-            >
-              <Box className="h-3.5 w-3.5 text-sky-500" />
-              <span>مختبر 3D GLB</span>
-            </button>
-            {!isStandaloneHtml && (
-              <a
-                href="/Centrifugal_Pump_Academy.html"
-                download="Centrifugal_Pump_Academy.html"
-                className="inline-flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-emerald-600/50 bg-emerald-600/10 px-3.5 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-600/20 dark:text-emerald-300 sm:w-auto"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>تحميل ملف HTML واحد المستقل</span>
-              </a>
-            )}
+          <div className="w-full shrink-0 overflow-hidden rounded-xl border border-sky-500/35 bg-slate-950 shadow-md lg:w-[340px]">
+            <img
+              src="/assets/aistudio/___________________________________________________________a200d03d.png"
+              alt="الشعار والهوية البصرية لأكاديمية مضخات الطرد المركزي"
+              className="aspect-video w-full object-cover object-center"
+            />
           </div>
         </div>
 

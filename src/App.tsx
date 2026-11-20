@@ -23,6 +23,8 @@ import { TroubleshootingView } from './components/TroubleshootingView';
 import { ExamCenterView } from './components/ExamCenterView';
 import { MaintenanceView } from './components/MaintenanceView';
 import { ToolsView } from './components/ToolsView';
+import { SplashScreen } from './components/SplashScreen';
+import { shouldSkipSplash } from './engine/splashUtils';
 
 const STORAGE_KEY = 'centrifugal_pump_academy_v1';
 
@@ -75,6 +77,9 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
   });
 
   const [darkMode, setDarkMode] = useState<boolean>(true);
+  const [showSplash, setShowSplash] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? !shouldSkipSplash(window.location.search) : true
+  );
   const [progress, setProgress] = useState<UserProgress>(loadProgress);
   const [selectedLessonId, setSelectedLessonId] = useState<number>(() => loadProgress().lastLessonId || 1);
   const [selected3DModel, setSelected3DModel] = useState<GlbModelId>('complete_pump');
@@ -164,6 +169,7 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       {/* Top 3-Zone Navigation Bar (Single-Row Desktop, Responsive Scrollable on Mobile) */}
       <header className="no-print sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95">
         <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-2 px-3 py-2 sm:px-4">
@@ -173,8 +179,12 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
             onClick={() => handleNavigate('home')}
             className="flex min-w-0 shrink-0 items-center gap-2 text-right"
           >
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white">
-              <Box className="h-4 w-4" />
+            <span className="flex h-9 w-14 shrink-0 overflow-hidden rounded-lg border border-sky-500/40 bg-slate-950 shadow-sm">
+              <img
+                src="/assets/aistudio/___________________________________________________________a200d03d.png"
+                alt="شعار أكاديمية مضخات الطرد المركزي"
+                className="h-full w-full object-cover object-center"
+              />
             </span>
             <div className="min-w-0 leading-tight">
               <div className="flex flex-col">

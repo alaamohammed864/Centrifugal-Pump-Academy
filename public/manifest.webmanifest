@@ -1,0 +1,19 @@
+{
+  "name": "أكاديمية مضخات الطرد المركزي | Centrifugal Pump Academy",
+  "short_name": "Pump Academy",
+  "description": "منصة تعليمية هندسية تفاعلية متكاملة لمضخات الطرد المركزي — شركة نفط البصرة",
+  "start_url": "/",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#020617",
+  "theme_color": "#0284c7",
+  "icons": [
+    {
+      "src": "/assets/aistudio/___________________________________________________________a200d03d.png",
+      "sizes": "1672x941",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

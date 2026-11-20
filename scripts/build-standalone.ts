@@ -45,6 +45,10 @@ async function main() {
     <title>أكاديمية مضخات الطرد المركزي | Centrifugal Pump Academy</title>
     <meta name="author" content="ENG ALAA MOHAMMED" />
     <meta name="description" content="منصة تعليمية هندسية تفاعلية متكاملة لمضخات الطرد المركزي – دراسة شركة نفط البصرة" />
+    <meta property="og:image" content="/assets/aistudio/___________________________________________________________a200d03d.png" />
+    <link rel="icon" type="image/png" href="/assets/aistudio/___________________________________________________________a200d03d.png" />
+    <link rel="apple-touch-icon" href="/assets/aistudio/___________________________________________________________a200d03d.png" />
+    <meta name="theme-color" content="#0284c7" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
