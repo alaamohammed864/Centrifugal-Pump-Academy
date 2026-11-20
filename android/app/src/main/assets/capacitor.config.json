@@ -1,0 +1,12 @@
+{
+	"appId": "com.engalaamohammed.pumpacademy",
+	"appName": "Pump Academy",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	},
+	"android": {
+		"backgroundColor": "#020617",
+		"allowMixedContent": false
+	}
+}

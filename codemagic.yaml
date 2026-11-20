@@ -1,0 +1,81 @@
+workflows:
+  android-apk-debug:
+    name: Build Android APK (Ready to Install - No Keystore Required)
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      node: 22
+      java: 21
+      vars:
+        PACKAGE_NAME: "com.engalaamohammed.pumpacademy"
+    scripts:
+      - name: Install Node dependencies
+        script: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+      - name: Run TypeScript & unit checks
+        script: |
+          npm run lint
+          npx tsx --test src/engine/*.test.ts src/data/*.test.ts
+      - name: Build web production bundle
+        script: |
+          npm run build
+      - name: Sync Capacitor Android project
+        script: |
+          npx cap sync android
+      - name: Configure Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build Debug APK
+        script: |
+          cd "$CM_BUILD_DIR/android"
+          chmod +x gradlew
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+
+  android-release-signed:
+    name: Build Signed Android Release (AAB & APK for Google Play)
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      android_signing:
+        - keystore_reference
+      node: 22
+      java: 21
+      vars:
+        PACKAGE_NAME: "com.engalaamohammed.pumpacademy"
+    scripts:
+      - name: Install Node dependencies
+        script: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+      - name: Run TypeScript & unit checks
+        script: |
+          npm run lint
+          npx tsx --test src/engine/*.test.ts src/data/*.test.ts
+      - name: Build web production bundle
+        script: |
+          npm run build
+      - name: Sync Capacitor Android project
+        script: |
+          npx cap sync android
+      - name: Configure Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build Signed Release AAB & APK
+        script: |
+          cd "$CM_BUILD_DIR/android"
+          chmod +x gradlew
+          ./gradlew bundleRelease assembleRelease \
+            -PversionCode=${CM_BUILD_NUMBER:-1} \
+            -PversionName=1.0.${CM_BUILD_NUMBER:-1}
+    artifacts:
+      - android/app/build/outputs/bundle/release/*.aab
+      - android/app/build/outputs/apk/release/*.apk
