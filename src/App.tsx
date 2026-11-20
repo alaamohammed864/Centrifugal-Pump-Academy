@@ -13,6 +13,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import type { GlbModelId, UserProgress } from './types/academy';
+import type { SimulatorPumpType } from './engine/pumpPhysics';
 import { DashboardHome, type WorkspaceTab } from './components/DashboardHome';
 import { LessonsView } from './components/LessonsView';
 import { Pump3DViewport } from './components/Pump3DViewport';
@@ -77,6 +78,7 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
   const [progress, setProgress] = useState<UserProgress>(loadProgress);
   const [selectedLessonId, setSelectedLessonId] = useState<number>(() => loadProgress().lastLessonId || 1);
   const [selected3DModel, setSelected3DModel] = useState<GlbModelId>('complete_pump');
+  const [selectedSimulatorType, setSelectedSimulatorType] = useState<SimulatorPumpType>('centrifugal_radial');
 
   useEffect(() => {
     try {
@@ -104,6 +106,12 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
   const handleOpen3DModel = (modelId: GlbModelId) => {
     setSelected3DModel(modelId);
     setActiveTab('lab3d');
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  };
+
+  const handleOpenSimulator = (pumpType: SimulatorPumpType) => {
+    setSelectedSimulatorType(pumpType);
+    setActiveTab('simulator');
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
@@ -266,9 +274,12 @@ export default function App({ isStandaloneHtml = false }: AppProps) {
           <Pump3DViewport
             initialModelId={selected3DModel}
             onJumpToLesson={(id) => handleNavigate('lessons', id)}
+            onOpenInSimulator={handleOpenSimulator}
           />
         )}
-        {activeTab === 'simulator' && <SimulatorView onOpen3DModel={handleOpen3DModel} />}
+        {activeTab === 'simulator' && (
+          <SimulatorView initialPumpType={selectedSimulatorType} onOpen3DModel={handleOpen3DModel} />
+        )}
         {activeTab === 'curves' && <CurvesView />}
         {activeTab === 'troubleshooting' && <TroubleshootingView />}
         {activeTab === 'exams' && (

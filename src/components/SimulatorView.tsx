@@ -11,15 +11,19 @@ import {
 } from '../engine/pumpPhysics';
 
 interface SimulatorViewProps {
+  initialPumpType?: SimulatorPumpType;
   onOpen3DModel?: (modelId: GlbModelId) => void;
 }
 
-export const SimulatorView: React.FC<SimulatorViewProps> = ({ onOpen3DModel }) => {
+export const SimulatorView: React.FC<SimulatorViewProps> = ({
+  initialPumpType = 'centrifugal_radial',
+  onOpen3DModel,
+}) => {
   const [pumpTypeFilter, setPumpTypeFilter] = useState<'all' | 'dynamic' | 'pd'>('all');
   const [inputs, setInputs] = useState<PumpSimInputs>({
     isRunning: true,
-    pumpType: 'centrifugal_radial',
-    rpm: PUMP_TYPE_PROFILES.centrifugal_radial.defaultRpm,
+    pumpType: initialPumpType,
+    rpm: PUMP_TYPE_PROFILES[initialPumpType].defaultRpm,
     suctionValvePct: 100,
     dischargeValvePct: 78,
     tankLevelM: 4.2,
@@ -29,6 +33,17 @@ export const SimulatorView: React.FC<SimulatorViewProps> = ({ onOpen3DModel }) =
     fluidViscosityCst: 5,
     scenarioId: 'normal',
   });
+
+  React.useEffect(() => {
+    const prof = PUMP_TYPE_PROFILES[initialPumpType];
+    if (!prof) return;
+    setInputs((prev) => ({
+      ...prev,
+      pumpType: initialPumpType,
+      rpm: prof.defaultRpm,
+      scenarioId: undefined,
+    }));
+  }, [initialPumpType]);
 
   const activePumpType: SimulatorPumpType = inputs.pumpType ?? 'centrifugal_radial';
   const activeProfile = PUMP_TYPE_PROFILES[activePumpType] ?? PUMP_TYPE_PROFILES.centrifugal_radial;

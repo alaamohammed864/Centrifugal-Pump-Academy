@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as esbuild from 'esbuild';
-import { generateAllGlbBase64Map } from '../src/engine/glbBuilder';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,11 +21,7 @@ async function main() {
   }
   const compiledCss = fs.readFileSync(path.join(distAssetsDir, cssFile), 'utf8');
 
-  console.log('2. Generating 17 embedded binary GLB 3D models in Base64...');
-  const glbMap = generateAllGlbBase64Map();
-  const glbJsonSafe = JSON.stringify(glbMap).replace(/</g, '\\u003c');
-
-  console.log('3. Bundling React + Three.js + Curriculum + Simulators as inline IIFE...');
+  console.log('2. Bundling React + Three.js (CDN GLB Loader) + Curriculum + Simulators...');
   const bundleResult = await esbuild.build({
     entryPoints: [path.join(rootDir, 'src', 'standaloneEntry.tsx')],
     bundle: true,
@@ -60,7 +55,6 @@ body { font-family: 'Cairo', 'Tahoma', 'Segoe UI', system-ui, sans-serif; }
   </head>
   <body>
     <div id="root"></div>
-    <script type="application/json" id="embedded-glb-models-b64">${glbJsonSafe}</script>
     <script>
 ${bundledJs}
     </script>
@@ -77,7 +71,7 @@ ${bundledJs}
   fs.writeFileSync(outPublic, html, 'utf8');
 
   const sizeKb = (Buffer.byteLength(html, 'utf8') / 1024).toFixed(1);
-  console.log(`Built standalone single-file HTML: ${outRoot} (${sizeKb} KB) & ${outPublic}`);
+  console.log(`Built single-file HTML (CDN GLB mode, zero Base64): ${outRoot} (${sizeKb} KB) & ${outPublic}`);
 }
 
 main().catch((err) => {

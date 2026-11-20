@@ -91,7 +91,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
               </span>
             </h1>
             <p className="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-              منهج متكامل من 27 درساً، 8 نماذج ثلاثية الأبعاد بصيغة GLB، محاكي تشغيل تفاعلي، منحنيات الأداء، مختبر «أنت مهندس الصيانة»، وبنك اختبارات يضم {QUESTIONS.length} سؤال اختيار متعدد.
+              منهج متكامل من 27 درساً، 17 نموذجاً ثلاثي الأبعاد بصيغة GLB، محاكي تشغيل تفاعلي، منحنيات الأداء، مختبر «أنت مهندس الصيانة»، وبنك اختبارات يضم {QUESTIONS.length} سؤال اختيار متعدد.
             </p>
             <div className="mt-2 inline-flex flex-wrap items-center gap-2 rounded-md border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-700 dark:text-sky-300">
               <span>إعداد وتطوير المنصة:</span>
@@ -225,7 +225,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           {
             tab: 'lab3d' as const,
             title: 'مختبر النماذج ثلاثية الأبعاد GLB',
-            desc: '8 نماذج CAD/GLB مضمنة: تفكيك المضخة، الدفاعات، السداد، المحامل، التكهف، المطرقة، والمحاذاة.',
+            desc: '17 نموذج CAD/GLB حقيقي مع حركات Operate، تفكيك الأجزاء، الدفاعات، المضخات متعددة المراحل والإزاحة الموجبة، والمحاذاة.',
             icon: Box,
             accent: 'text-indigo-500',
           },
