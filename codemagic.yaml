@@ -2,7 +2,7 @@ workflows:
   android-apk-debug:
     name: Build Android APK (Ready to Install - No Keystore Required)
     max_build_duration: 60
-    instance_type: linux_x2
+    instance_type: mac_mini_m2
     environment:
       node: 22
       java: 21
@@ -28,7 +28,8 @@ workflows:
           npx cap sync android
       - name: Configure Android SDK location
         script: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+          SDK_PATH="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          echo "sdk.dir=$SDK_PATH" > "$CM_BUILD_DIR/android/local.properties"
       - name: Build Debug APK
         script: |
           cd "$CM_BUILD_DIR/android"
@@ -40,7 +41,7 @@ workflows:
   android-release-signed:
     name: Build Signed Android Release (AAB & APK for Google Play)
     max_build_duration: 60
-    instance_type: linux_x2
+    instance_type: mac_mini_m2
     environment:
       android_signing:
         - keystore_reference
@@ -68,7 +69,8 @@ workflows:
           npx cap sync android
       - name: Configure Android SDK location
         script: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+          SDK_PATH="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          echo "sdk.dir=$SDK_PATH" > "$CM_BUILD_DIR/android/local.properties"
       - name: Build Signed Release AAB & APK
         script: |
           cd "$CM_BUILD_DIR/android"
